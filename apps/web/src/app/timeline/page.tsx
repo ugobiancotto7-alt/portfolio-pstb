@@ -47,13 +47,15 @@ export default async function TimelinePage() {
         {[...byMonth.entries()].map(([month, items]) => (
           // Une ligne par mois : le mois à gauche, les entrées à droite
           <li key={month} className="grid gap-6 border-b border-border py-12 md:grid-cols-[260px_1fr]">
-            <h2 className="font-display text-4xl leading-none md:sticky md:top-28 md:self-start">{formatMonth(month)}</h2>
+            <h2 className="font-display text-3xl leading-none md:sticky md:top-28 md:self-start">
+              {formatMonth(month)}
+            </h2>
             <ul className="divide-y divide-border">
               {items.map((entry, i) => {
                 const href = hrefFor(entry);
                 const body = (
                   <div className="grid grid-cols-[2.5rem_1fr] gap-4 py-5 first:pt-0">
-                    <span className="font-display text-2xl italic text-muted">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="font-mono text-sm text-cyan">{String(i + 1).padStart(2, "0")}</span>
                     <div>
                       <p className="eyebrow">
                         {KIND_LABELS[entry.kind]} · {formatDate(entry.date)}

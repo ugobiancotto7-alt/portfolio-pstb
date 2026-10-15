@@ -13,9 +13,12 @@ export default async function ProjectsPage() {
         Nos projets Data &amp; IA : contexte, technologies et résultats.
       </PageHeader>
       {projects.length === 0 ? (
-        <div className="mt-14 border border-dashed border-border px-6 py-16 text-center">
-          <p className="font-display text-3xl">Les premiers projets arrivent bientôt.</p>
-          <p className="mt-3 text-sm text-muted">Ils seront ajoutés depuis l&apos;espace admin au fil de l&apos;année.</p>
+        <div className="glass mt-14 rounded-2xl border-dashed px-6 py-16 text-center">
+          <p className="font-mono text-xs text-cyan">// status: en préparation</p>
+          <p className="mt-3 font-display text-3xl">Les premiers projets arrivent bientôt.</p>
+          <p className="mt-3 text-sm text-muted">
+            Ils seront ajoutés depuis l&apos;espace admin au fil de l&apos;année.
+          </p>
         </div>
       ) : (
         <div className="mt-14 grid gap-x-6 gap-y-12 sm:grid-cols-2">

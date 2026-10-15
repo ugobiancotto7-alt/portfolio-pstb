@@ -1,10 +1,10 @@
 /*
  * Tailwind CSS v4 : la configuration se fait directement dans le CSS.
  *
- * Direction artistique : un style "éditorial" inspiré des beaux sites
- * d'architecture d'intérieur. Fond blanc cassé chaud, titres en serif,
- * beaucoup d'espace, grandes photos et numérotation 01, 02, 03…
- * La couleur indigo du logo PSTB sert d'accent, avec parcimonie.
+ * Direction artistique "IA / business" : fond très sombre bleu nuit,
+ * accents indigo (couleur du logo PSTB) et cyan, panneaux translucides,
+ * grille de fond façon "tableau de bord", police Geist + Geist Mono
+ * pour les petites étiquettes techniques.
  */
 @import "tailwindcss";
 
@@ -13,17 +13,19 @@
 
 /*
  * Chaque variable --color-xxx devient une classe Tailwind :
- * bg-surface, text-muted, border-border, text-brand-600…
+ * bg-surface, text-muted, border-border, text-brand-500, text-cyan…
  * Les valeurs changent selon le thème (voir :root et .dark plus bas).
  */
 @theme {
-  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --color-brand-400: var(--accent-soft);
+  --color-brand-400: var(--accent);
   --color-brand-500: var(--accent);
   --color-brand-600: var(--accent);
-  --color-brand-700: var(--accent-strong);
+  --color-brand-700: var(--accent);
+  --color-cyan: var(--accent-2);
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -35,35 +37,37 @@
   --color-on-ink: var(--on-ink);
 }
 
-/* Mode clair : papier chaud */
+/* Mode clair : blanc froid, encre bleu nuit */
 :root {
-  --bg: #efebe6;
-  --surface: #f8f5f1;
-  --sunken: #e6e0d8;
-  --border: #d8d0c5;
-  --fg: #1d1a17;
-  --muted: #6b6259;
-  --ink: #1d1a17; /* boutons pleins */
-  --on-ink: #f8f5f1;
-  --accent: #3f3d9e; /* indigo du logo PSTB */
-  --accent-strong: #2f2d80;
-  --accent-soft: #3f3d9e;
+  --bg: #f5f6fb;
+  --surface: #ffffff;
+  --sunken: #eceef6;
+  --border: #dcdfeb;
+  --fg: #0b0d1a;
+  --muted: #5a607a;
+  --ink: #0b0d1a;
+  --on-ink: #ffffff;
+  --accent: #4f46e5;
+  --accent-2: #0891b2;
+  --grid: rgb(11 13 26 / 0.05);
+  --glow: rgb(79 70 229 / 0.18);
   color-scheme: light;
 }
 
-/* Mode sombre : brun très profond plutôt que noir pur */
+/* Mode sombre (par défaut) : bleu nuit presque noir */
 .dark {
-  --bg: #151311;
-  --surface: #1e1b18;
-  --sunken: #11100e;
-  --border: #36312b;
-  --fg: #efebe6;
-  --muted: #a69c90;
-  --ink: #efebe6;
-  --on-ink: #151311;
-  --accent: #a9a7f2;
-  --accent-strong: #c4c2f7;
-  --accent-soft: #a9a7f2;
+  --bg: #06070d;
+  --surface: #0d0f1a;
+  --sunken: #090a12;
+  --border: #1d2033;
+  --fg: #eef0ff;
+  --muted: #8b90ad;
+  --ink: #eef0ff;
+  --on-ink: #06070d;
+  --accent: #8b8bff;
+  --accent-2: #22d3ee;
+  --grid: rgb(238 240 255 / 0.045);
+  --glow: rgb(124 124 255 / 0.28);
   color-scheme: dark;
 }
 
@@ -78,9 +82,80 @@ h3 {
   text-wrap: balance;
 }
 
-/* Petit label numéroté au-dessus des titres : "01 — L'équipe" */
+/* Les grands titres : serrés et un peu gras, typiques des sites "tech" */
+.font-display {
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+
+/* Petite étiquette technique au-dessus des titres : "// 01 — Équipe" */
 .eyebrow {
-  @apply text-xs font-semibold uppercase tracking-[0.18em] text-muted;
+  @apply font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-muted;
+}
+
+/* Texte en dégradé indigo -> cyan */
+.text-gradient {
+  background: linear-gradient(100deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Grille de fond façon "tableau de bord" */
+.bg-grid {
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Panneau translucide ("verre dépoli") */
+.glass {
+  background: color-mix(in oklab, var(--surface) 72%, transparent);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+}
+
+/* Halo lumineux derrière un élément */
+.glow {
+  box-shadow: 0 0 0 1px var(--border), 0 20px 60px -20px var(--glow);
+}
+
+/* Carte qui s'incline en 3D sous la souris (voir lib/enhance.ts) */
+[data-tilt] {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.25s ease-out;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Point lumineux qui circule le long du pipeline */
+@keyframes flow {
+  from {
+    left: 0%;
+  }
+  to {
+    left: 100%;
+  }
+}
+.flow-dot {
+  animation: flow 4s linear infinite;
+}
+
+/* Menu plein écran : apparition des liens en cascade */
+@keyframes menu-in {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+[data-menu][data-open="true"] [data-menu-item] {
+  animation: menu-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms + 80ms);
 }
 
 /* Styles du contenu Markdown des articles */
@@ -88,32 +163,38 @@ h3 {
   @apply text-[17px];
 }
 .prose-article h2 {
-  @apply mt-14 mb-4 font-display text-4xl leading-tight;
+  @apply mt-14 mb-4 font-display text-3xl leading-tight;
 }
 .prose-article h3 {
   @apply mt-8 mb-2 text-lg font-semibold;
 }
 .prose-article p {
-  @apply my-4 leading-8;
+  @apply my-4 leading-8 text-fg/85;
 }
 .prose-article ul {
-  @apply my-4 list-disc space-y-2 pl-6;
+  @apply my-4 list-disc space-y-2 pl-6 marker:text-brand-500;
 }
 .prose-article ol {
-  @apply my-4 list-decimal space-y-2 pl-6;
+  @apply my-4 list-decimal space-y-2 pl-6 marker:text-brand-500;
 }
 .prose-article a {
-  @apply text-brand-600 underline underline-offset-2;
+  @apply text-brand-500 underline underline-offset-2;
 }
 .prose-article strong {
   @apply font-semibold text-fg;
 }
 .prose-article li {
-  @apply leading-8;
+  @apply leading-8 text-fg/85;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
     transition: none !important;
+  }
+  [data-tilt] {
+    transform: none !important;
   }
 }

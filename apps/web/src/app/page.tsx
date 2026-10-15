@@ -1,18 +1,19 @@
 /**
- * Page d'accueil, mise en page "éditoriale" :
- *   1. grande photo plein écran avec le titre par-dessus
- *   2. les chiffres clés en grand
- *   3. l'équipe en photos
- *   4. le dernier compte rendu (photo + texte côte à côte)
- *   5. quelques moments en images
- *   6. un bandeau final pour inviter à suivre la timeline
+ * Page d'accueil, style "IA / business" :
+ *   1. hero : texte à gauche, sphère neuronale 3D interactive à droite
+ *   2. barre de métriques façon tableau de bord
+ *   3. notre méthode présentée comme un pipeline de données (cartes qui zooment)
+ *   4. l'équipe (cartes qui s'inclinent en 3D sous la souris)
+ *   5. le dernier compte rendu
+ *   6. quelques moments en images
+ *   7. bandeau final
  *
  * C'est un Server Component : il est "async" et appelle l'API avant
- * d'envoyer le HTML au navigateur.
+ * d'envoyer le HTML. Les animations sont ajoutées ensuite par lib/enhance.ts.
  */
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { Activity, ArrowRight, ArrowUpRight, BrainCircuit, Database, Rocket, Sparkles } from "lucide-react";
 import { Container } from "@/components/Container";
 import { SectionHeading } from "@/components/SectionHeading";
 import { api } from "@/lib/api";
@@ -20,140 +21,205 @@ import { formatDate } from "@/lib/format";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
+// Les 5 étapes d'un projet data, de la donnée brute au modèle surveillé
+const pipeline = [
+  { icon: Database, step: "Collecter", text: "Trouver et récupérer les bonnes données : API, fichiers, bases SQL." },
+  { icon: Sparkles, step: "Nettoyer", text: "Corriger, compléter et explorer les données avec pandas et SQL." },
+  { icon: BrainCircuit, step: "Modéliser", text: "Entraîner et évaluer des modèles de machine learning." },
+  { icon: Rocket, step: "Déployer", text: "Mettre le modèle à disposition via une API ou une application." },
+  { icon: Activity, step: "Observer", text: "Surveiller qualité, latence et coûts une fois en production." },
+];
+
 export default async function HomePage() {
   const [members, articles, stats] = await Promise.all([api.members(), api.articles(), api.stats()]);
   const latest = articles.items[0];
-  // Le dernier article complet, pour récupérer ses photos
   const latestFull = latest ? await api.article(latest.slug) : null;
   const photos = latestFull?.photos.filter((p) => p.url) ?? [];
-  const heroPhoto = photos[0];
-  const moments = photos.slice(2, 5); // 3 photos différentes de la couverture et du hero
+  const moments = photos.slice(2, 5); // 3 photos différentes de la couverture
 
-  const figures = [
-    { value: pad(members.length), label: "étudiants, une même promo" },
-    { value: pad(stats.totals.events), label: stats.totals.events > 1 ? "événements suivis ensemble" : "événement suivi ensemble" },
-    { value: pad(stats.totals.articles), label: stats.totals.articles > 1 ? "comptes rendus publiés" : "compte rendu publié" },
-    { value: "12", label: "mois de progression à raconter" },
+  const metrics = [
+    { label: "Étudiants", value: pad(members.length) },
+    { label: "Événements", value: pad(stats.totals.events) },
+    { label: "Articles", value: pad(stats.totals.articles) },
+    { label: "Photos", value: pad(photos.length) },
   ];
 
   return (
     <>
-      {/* 1. HERO : la photo remplit toute la largeur, le texte est posé dessus */}
-      <section className="relative isolate flex min-h-[560px] items-end overflow-hidden bg-ink sm:min-h-[640px]">
-        {heroPhoto?.url && (
-          <Image src={heroPhoto.url} alt={heroPhoto.alt} fill priority sizes="100vw" className="-z-10 object-cover opacity-80" />
-        )}
-        {/* Dégradé sombre pour que le texte blanc reste lisible sur la photo */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/40 to-black/10" aria-hidden />
-        <Container className="pb-12 pt-32 text-white sm:pb-16">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
-            Bachelor Data &amp; IA · Paris School of Technology &amp; Business
-          </p>
-          <h1 className="mt-5 max-w-4xl font-display text-5xl leading-[0.98] sm:text-7xl lg:text-[5.5rem]">
-            Notre année en data et en IA,
-            <br />
-            <em className="text-white/85">racontée mois par mois.</em>
-          </h1>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
-            <Link
-              href="/timeline"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-white/85"
-            >
-              Voir la timeline <ArrowRight className="size-4" />
-            </Link>
-            <Link
-              href="/equipe"
-              className="inline-flex items-center rounded-full border border-white/50 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Rencontrer l&apos;équipe
-            </Link>
-          </div>
-          {heroPhoto && (
-            <p className="mt-12 text-xs text-white/60">
-              {heroPhoto.caption} · {formatDate(latestFull?.event?.startsOn)}
+      {/* 1. HERO */}
+      <section className="relative overflow-hidden border-b border-border">
+        <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
+        {/* Halos de couleur flous en fond */}
+        <div
+          className="pointer-events-none absolute -left-40 top-10 size-[520px] rounded-full bg-brand-500/20 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -right-20 bottom-0 size-[420px] rounded-full bg-cyan/10 blur-3xl"
+          aria-hidden
+        />
+
+        <Container className="relative grid items-center gap-6 py-14 lg:grid-cols-[1.1fr_1fr] lg:py-20">
+          <div>
+            <p className="glass inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-muted">
+              <span className="size-1.5 animate-pulse rounded-full bg-cyan" aria-hidden />
+              Bachelor Data &amp; IA · PSTB · 2026-2027
             </p>
-          )}
+            <h1 className="mt-6 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-7xl">
+              Apprendre la data.
+              <br />
+              <span className="text-gradient">Construire l&apos;IA.</span>
+              <br />
+              Le documenter.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-muted">
+              Le journal de bord d&apos;Ugo, Tim et Marcelo : nos projets, nos compétences et les événements qui
+              façonnent notre année.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/timeline"
+                className="group inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-on-ink transition hover:opacity-90"
+              >
+                Explorer la timeline <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="/projets"
+                className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition hover:border-brand-500"
+              >
+                Voir nos projets
+              </Link>
+            </div>
+          </div>
+
+          {/* La sphère 3D : un <canvas> animé par lib/enhance.ts */}
+          <div className="relative mx-auto aspect-square w-full max-w-[520px]">
+            <canvas
+              data-neural
+              className="h-full w-full cursor-grab touch-none"
+              aria-label="Réseau de neurones en 3D, animé"
+            />
+            <span className="glass absolute left-2 top-8 rounded-lg px-3 py-2 font-mono text-[11px] text-muted">
+              <span className="text-cyan">●</span> model.status = <span className="text-fg">&quot;learning&quot;</span>
+            </span>
+            <span className="glass absolute bottom-10 right-2 rounded-lg px-3 py-2 font-mono text-[11px] text-muted">
+              epoch <span className="text-fg">02/12</span> · mois d&apos;octobre
+            </span>
+          </div>
+        </Container>
+
+        {/* 2. Barre de métriques */}
+        <Container className="relative pb-10">
+          <dl className="glass grid grid-cols-2 divide-border rounded-2xl sm:grid-cols-4 sm:divide-x">
+            {metrics.map((m) => (
+              <div key={m.label} className="px-6 py-5">
+                <dt className="eyebrow">{m.label}</dt>
+                <dd className="mt-2 font-display text-4xl tabular-nums">{m.value}</dd>
+              </div>
+            ))}
+          </dl>
         </Container>
       </section>
 
-      {/* Bandeau de thèmes, comme des "pastilles" */}
-      <div className="border-b border-border">
-        <Container className="flex flex-wrap gap-x-8 gap-y-2 py-5 text-sm text-muted">
-          {["Projets Data & IA", "Comptes rendus d'événements", "Compétences acquises", "Progression mensuelle"].map((t) => (
-            <span key={t} className="inline-flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-brand-500" aria-hidden />
-              {t}
-            </span>
-          ))}
-        </Container>
-      </div>
-
-      {/* 2. CHIFFRES CLÉS */}
-      <Container className="mt-24">
-        <SectionHeading n="01" label="En chiffres" title="Une année, trois parcours.">
-          Ces chiffres sont calculés en direct par notre API à partir de la base de données.
+      {/* 3. MÉTHODE = PIPELINE (les cartes zooment au survol) */}
+      <Container className="mt-28">
+        <SectionHeading n="01" label="Méthode" title="Notre façon de travailler, comme un pipeline.">
+          Chaque projet suit les étapes d&apos;un vrai workflow data, de la donnée brute au modèle surveillé en
+          production.
         </SectionHeading>
-        <dl className="grid grid-cols-2 border-t border-border lg:grid-cols-4">
-          {figures.map((f) => (
-            <div key={f.label} className="border-b border-border py-8 pr-6 lg:border-b-0">
-              <dt className="sr-only">{f.label}</dt>
-              <dd className="font-display text-6xl leading-none tabular-nums sm:text-7xl">{f.value}</dd>
-              <dd className="mt-3 text-sm text-muted">{f.label}</dd>
-            </div>
-          ))}
-        </dl>
+
+        <div className="relative">
+          {/* La ligne qui relie les étapes, avec un point lumineux qui circule */}
+          <div className="absolute left-0 right-0 top-[38px] hidden h-px bg-border lg:block" aria-hidden>
+            <span className="flow-dot absolute -top-[3px] size-[7px] rounded-full bg-cyan shadow-[0_0_12px_var(--accent-2)]" />
+          </div>
+          <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {pipeline.map(({ icon: Icon, step, text }, i) => (
+              <li
+                key={step}
+                className="group glass relative rounded-2xl p-5 transition duration-300 hover:z-10 hover:scale-[1.06] hover:border-brand-500 hover:shadow-[0_24px_60px_-24px_var(--glow)]"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex size-10 items-center justify-center rounded-xl border border-border bg-bg text-brand-500 transition group-hover:bg-brand-500 group-hover:text-on-ink">
+                    <Icon className="size-5" aria-hidden />
+                  </span>
+                  <span className="font-mono text-xs text-muted">{pad(i + 1)}</span>
+                </div>
+                <h3 className="mt-5 text-lg font-semibold">{step}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted">{text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
       </Container>
 
-      {/* 3. L'ÉQUIPE */}
+      {/* 4. ÉQUIPE (cartes inclinables) */}
       <Container className="mt-28">
-        <SectionHeading n="02" label="L'équipe" title="Ugo, Tim et Marcelo.">
-          Trois étudiants de la même promo, qui documentent ensemble ce qu&apos;ils apprennent.
+        <SectionHeading n="02" label="Équipe" title="Trois profils, une même promo.">
+          Passez la souris sur une carte pour la voir bouger en 3D.
         </SectionHeading>
         <div className="grid gap-6 sm:grid-cols-3">
           {members.map((m, i) => (
-            <Link key={m.id} href={`/equipe#${m.slug}`} className="group">
-              <div className="relative aspect-[4/5] overflow-hidden bg-sunken">
+            <Link
+              key={m.id}
+              href={`/equipe#${m.slug}`}
+              data-tilt="10"
+              className="group glass glow block overflow-hidden rounded-2xl"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden">
                 {m.avatarUrl && (
                   <Image
                     src={m.avatarUrl}
                     alt={m.firstName}
                     fill
                     sizes="(min-width: 640px) 33vw, 100vw"
-                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                    className="object-cover transition duration-500 group-hover:scale-105"
                   />
                 )}
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"
+                  aria-hidden
+                />
+                <span className="absolute left-4 top-4 rounded-full bg-black/40 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-white backdrop-blur">
+                  {pad(i + 1)} / {pad(members.length)}
+                </span>
+                <div className="absolute inset-x-4 bottom-4 flex items-end justify-between text-white">
+                  <div>
+                    <p className="text-2xl font-semibold tracking-tight">{m.firstName}</p>
+                    <p className="text-xs text-white/70">{m.role}</p>
+                  </div>
+                  <ArrowUpRight className="size-5 opacity-0 transition group-hover:opacity-100" />
+                </div>
               </div>
-              <div className="mt-4 flex items-baseline justify-between border-b border-border pb-4">
-                <h3 className="font-display text-3xl">{m.firstName}</h3>
-                <span className="text-xs text-muted">{pad(i + 1)}</span>
-              </div>
-              <p className="mt-2 text-sm text-muted">{m.role}</p>
             </Link>
           ))}
         </div>
       </Container>
 
-      {/* 4. DERNIER COMPTE RENDU : photo et texte côte à côte */}
+      {/* 5. DERNIER COMPTE RENDU */}
       {latest && (
         <Container className="mt-28">
           <SectionHeading n="03" label="Dernier article" title="Sur le terrain." />
-          <Link href={`/articles/${latest.slug}`} className="group grid items-center gap-8 md:grid-cols-2 md:gap-14">
-            <div className="relative aspect-[4/3] overflow-hidden bg-sunken">
+          <Link
+            href={`/articles/${latest.slug}`}
+            className="group glass glow grid overflow-hidden rounded-3xl md:grid-cols-2"
+          >
+            <div className="relative aspect-[4/3] overflow-hidden md:aspect-auto md:min-h-[380px]">
               {latest.coverUrl && (
                 <Image
                   src={latest.coverUrl}
                   alt=""
                   fill
                   sizes="(min-width: 768px) 50vw, 100vw"
-                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                  className="object-cover transition duration-700 group-hover:scale-105"
                 />
               )}
             </div>
-            <div>
-              <p className="eyebrow">{formatDate(latest.publishedAt)}</p>
-              <h3 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">{latest.title}</h3>
-              <p className="mt-5 leading-7 text-muted">{latest.excerpt}</p>
-              <span className="mt-8 inline-flex items-center gap-2 border-b border-fg pb-1 text-sm font-semibold">
+            <div className="flex flex-col justify-center p-8 sm:p-12">
+              <p className="eyebrow">Compte rendu · {formatDate(latest.publishedAt)}</p>
+              <h3 className="mt-4 font-display text-4xl leading-tight">{latest.title}</h3>
+              <p className="mt-4 leading-7 text-muted">{latest.excerpt}</p>
+              <span className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-500">
                 Lire le compte rendu <ArrowRight className="size-4 transition group-hover:translate-x-1" />
               </span>
             </div>
@@ -161,7 +227,7 @@ export default async function HomePage() {
         </Container>
       )}
 
-      {/* 5. MOMENTS EN IMAGES */}
+      {/* 6. MOMENTS */}
       {moments.length > 0 && latest && (
         <Container className="mt-28">
           <SectionHeading n="04" label="En images" title="Quelques moments.">
@@ -170,20 +236,27 @@ export default async function HomePage() {
           <ul className="grid gap-4 sm:grid-cols-3">
             {moments.map((p, i) => (
               <li key={p.id}>
-                <Link href={`/articles/${latest.slug}#galerie`} className="group block">
-                  <div className="relative aspect-[3/4] overflow-hidden bg-sunken">
+                <Link
+                  href={`/articles/${latest.slug}#galerie`}
+                  className="group block overflow-hidden rounded-2xl border border-border"
+                >
+                  <div className="relative aspect-[3/4] overflow-hidden">
                     <Image
                       src={p.url!}
                       alt={p.alt}
                       fill
                       sizes="(min-width: 640px) 33vw, 100vw"
-                      className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                      className="object-cover transition duration-700 group-hover:scale-110"
                     />
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent"
+                      aria-hidden
+                    />
+                    <p className="absolute inset-x-4 bottom-4 text-sm text-white">
+                      <span className="mr-2 font-mono text-xs text-white/60">{pad(i + 1)}</span>
+                      {p.caption}
+                    </p>
                   </div>
-                  <p className="mt-3 text-sm text-muted">
-                    <span className="mr-2 font-display italic text-fg">{pad(i + 1)}</span>
-                    {p.caption}
-                  </p>
                 </Link>
               </li>
             ))}
@@ -191,20 +264,33 @@ export default async function HomePage() {
         </Container>
       )}
 
-      {/* 6. BANDEAU FINAL */}
+      {/* 7. BANDEAU FINAL */}
       <Container className="mt-28">
-        <div className="bg-ink px-6 py-16 text-on-ink sm:px-14 sm:py-20">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] opacity-60">La suite</p>
-          <h2 className="mt-4 max-w-2xl font-display text-5xl leading-[1.02] sm:text-6xl">
-            Suivez notre progression, mois après mois.
-          </h2>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Link href="/timeline" className="rounded-full bg-on-ink px-6 py-3 text-sm font-semibold text-ink transition hover:opacity-85">
-              Ouvrir la timeline
-            </Link>
-            <Link href="/projets" className="rounded-full border border-current px-6 py-3 text-sm font-semibold transition hover:opacity-80">
-              Voir les projets
-            </Link>
+        <div className="relative overflow-hidden rounded-3xl border border-border px-6 py-16 sm:px-14 sm:py-20">
+          <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
+          <div
+            className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-brand-500/25 blur-3xl"
+            aria-hidden
+          />
+          <div className="relative">
+            <p className="eyebrow">// la suite</p>
+            <h2 className="mt-4 max-w-2xl font-display text-4xl leading-[1.05] sm:text-6xl">
+              Suivez notre progression, <span className="text-gradient">mois après mois.</span>
+            </h2>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link
+                href="/timeline"
+                className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-on-ink transition hover:opacity-90"
+              >
+                Ouvrir la timeline
+              </Link>
+              <Link
+                href="/articles"
+                className="glass rounded-full px-6 py-3 text-sm font-semibold transition hover:border-brand-500"
+              >
+                Lire les articles
+              </Link>
+            </div>
           </div>
         </div>
       </Container>

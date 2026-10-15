@@ -19,40 +19,56 @@ export default async function TeamPage() {
 
       <div className="mt-14 grid gap-x-6 gap-y-14 md:grid-cols-3">
         {members.map((member, i) => (
-          <article key={member.id} id={member.slug} className="flex scroll-mt-28 flex-col">
-            <div className="relative aspect-[4/5] overflow-hidden bg-sunken">
+          <article
+            key={member.id}
+            id={member.slug}
+            className="glass flex scroll-mt-28 flex-col overflow-hidden rounded-2xl"
+          >
+            <div data-tilt="6" className="relative aspect-[4/5] overflow-hidden bg-sunken">
               {member.avatarUrl ? (
-                <Image src={member.avatarUrl} alt={member.firstName} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+                <Image
+                  src={member.avatarUrl}
+                  alt={member.firstName}
+                  fill
+                  sizes="(min-width: 768px) 33vw, 100vw"
+                  className="object-cover"
+                />
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <Avatar member={member} size={96} />
                 </div>
               )}
             </div>
-            <div className="mt-5 flex items-baseline justify-between border-b border-border pb-4">
-              <h2 className="font-display text-4xl">
-                {member.firstName} {member.lastName}
-              </h2>
-              <span className="text-xs text-muted">{String(i + 1).padStart(2, "0")}</span>
-            </div>
-            {member.role && <p className="mt-3 text-sm font-semibold">{member.role}</p>}
-            {member.bio && <p className="mt-2 text-sm leading-6 text-muted">{member.bio}</p>}
+            <div className="flex flex-1 flex-col p-6">
+              <div className="flex items-baseline justify-between border-b border-border pb-4">
+                <h2 className="font-display text-3xl">
+                  {member.firstName} {member.lastName}
+                </h2>
+                <span className="font-mono text-xs text-cyan">{String(i + 1).padStart(2, "0")}</span>
+              </div>
+              {member.role && <p className="mt-3 text-sm font-semibold">{member.role}</p>}
+              {member.bio && <p className="mt-2 text-sm leading-6 text-muted">{member.bio}</p>}
 
-            {member.skills.length > 0 && (
-              <ul className="mt-4 flex flex-wrap gap-1.5">
-                {/* On trie les compétences par catégorie pour un affichage stable */}
-                {[...member.skills]
-                  .sort((a, b) => SKILL_CATEGORIES.indexOf(a.category) - SKILL_CATEGORIES.indexOf(b.category))
-                  .map((skill) => (
-                    <li key={skill.id} className="rounded-full border border-border px-3 py-1 text-xs" title={`Niveau ${skill.level}/5`}>
-                      {skill.name}
-                    </li>
-                  ))}
-              </ul>
-            )}
+              {member.skills.length > 0 && (
+                <ul className="mt-4 flex flex-wrap gap-1.5">
+                  {/* On trie les compétences par catégorie pour un affichage stable */}
+                  {[...member.skills]
+                    .sort((a, b) => SKILL_CATEGORIES.indexOf(a.category) - SKILL_CATEGORIES.indexOf(b.category))
+                    .map((skill) => (
+                      <li
+                        key={skill.id}
+                        className="rounded-full border border-border px-3 py-1 text-xs"
+                        title={`Niveau ${skill.level}/5`}
+                      >
+                        {skill.name}
+                      </li>
+                    ))}
+                </ul>
+              )}
 
-            <div className="mt-auto pt-5">
-              <ExternalLinks member={member} />
+              <div className="mt-auto pt-5">
+                <ExternalLinks member={member} />
+              </div>
             </div>
           </article>
         ))}

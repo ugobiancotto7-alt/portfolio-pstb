@@ -16,9 +16,15 @@ export function Gallery({ photos }: { photos: Photo[] }) {
       <ul className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4">
         {photos.map((photo, i) => (
           <li key={photo.id}>
-            <div className="relative aspect-[3/4] overflow-hidden bg-sunken">
+            <div className="group relative aspect-[3/4] overflow-hidden rounded-xl border border-border bg-sunken">
               {photo.url ? (
-                <Image src={photo.url} alt={photo.alt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
+                <Image
+                  src={photo.url}
+                  alt={photo.alt}
+                  fill
+                  sizes="(min-width: 1024px) 25vw, 50vw"
+                  className="object-cover transition duration-700 group-hover:scale-110"
+                />
               ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-2 border border-dashed border-border text-muted">
                   <ImageIcon className="size-6" aria-hidden />
@@ -28,7 +34,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
             </div>
             {photo.caption && (
               <p className="mt-3 text-sm leading-5 text-muted">
-                <span className="mr-2 font-display italic text-fg">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mr-2 font-mono text-xs text-cyan">{String(i + 1).padStart(2, "0")}</span>
                 {photo.caption}
               </p>
             )}

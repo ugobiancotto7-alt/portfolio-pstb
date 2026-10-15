@@ -10,6 +10,7 @@
  */
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Enhancer } from "@/components/Enhancer";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -17,7 +18,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "Ugo, Tim & Marcelo · Data & IA à la PSTB", template: "%s · PSTB Data & IA" },
-  description: "Le journal de bord de trois étudiants en Bachelor Data & IA à la Paris School of Technology & Business.",
+  description:
+    "Le journal de bord de trois étudiants en Bachelor Data & IA à la Paris School of Technology & Business.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -25,13 +27,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     // suppressHydrationWarning : next-themes ajoute la classe "dark" avant React, c'est voulu.
     <html lang="fr" suppressHydrationWarning>
       <head>
-        {/* Polices : Instrument Serif pour les titres, Manrope pour le texte */}
+        {/* Polices : Geist pour le texte et les titres, Geist Mono pour les étiquettes */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
         />
       </head>
       <body className="min-h-screen font-sans antialiased">
@@ -39,6 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Header />
           <main>{children}</main>
           <Footer />
+          <Enhancer />
         </ThemeProvider>
       </body>
     </html>

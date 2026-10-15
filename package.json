@@ -13,9 +13,13 @@
     "dev:web": "npm run dev --workspace=apps/web",
     "db:reset": "npm run db:reset --workspace=apps/api",
     "build": "npm run build --workspace=apps/web",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "format": "prettier --write \"apps/*/src/**/*.{ts,tsx,css}\" \"packages/*/src/**/*.ts\""
   },
   "engines": {
     "node": ">=22"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10"
   }
 }

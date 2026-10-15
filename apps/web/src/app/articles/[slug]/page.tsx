@@ -44,20 +44,27 @@ export default async function ArticlePage({ params }: Props) {
           <p className="eyebrow mt-8">
             {ARTICLE_TYPE_LABELS[article.type]} · {formatDate(article.publishedAt)}
           </p>
-          <h1 className="mt-4 max-w-5xl font-display text-5xl leading-[0.98] sm:text-7xl">{article.title}</h1>
+          <h1 className="mt-4 max-w-5xl font-display text-4xl leading-[1.02] sm:text-6xl">{article.title}</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">{article.excerpt}</p>
         </div>
 
         {article.coverUrl && (
-          <div className="relative mt-12 aspect-[16/9] overflow-hidden bg-sunken">
-            <Image src={article.coverUrl} alt="" fill priority sizes="(min-width: 1152px) 1152px, 100vw" className="object-cover" />
+          <div className="glow relative mt-12 aspect-[16/9] overflow-hidden rounded-3xl bg-sunken">
+            <Image
+              src={article.coverUrl}
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 1152px) 1152px, 100vw"
+              className="object-cover"
+            />
           </div>
         )}
 
         <div className="mt-14 grid gap-12 lg:grid-cols-[260px_1fr]">
           {/* Colonne de gauche : infos pratiques (passe au-dessus du texte sur mobile) */}
           <aside className="lg:sticky lg:top-28 lg:self-start">
-            <dl className="divide-y divide-border border-y border-border">
+            <dl className="glass divide-y divide-border rounded-2xl px-5">
               {facts.map((f) => (
                 <div key={f.label} className="py-4">
                   <dt className="eyebrow">{f.label}</dt>

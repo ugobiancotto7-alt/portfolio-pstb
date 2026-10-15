@@ -55,6 +55,7 @@ Commandes utiles :
 | `npm run db:reset` | Supprime et recrée toutes les tables, puis remet les données de départ |
 | `npm run typecheck` | Vérifie les types TypeScript des 3 paquets |
 | `npm run build` | Construit le site pour la production |
+| `npm run format` | Met en forme le code automatiquement (Prettier) |
 
 ## Déploiement (gratuit)
 
@@ -98,6 +99,8 @@ Quand on ouvre `/articles/compte-rendu-datadog-summit-paris-2026` :
 **`apps/web/src/app/globals.css`** : les couleurs sont des **variables CSS** qui changent quand la classe `dark` est posée sur `<html>`. Les composants n'écrivent `bg-surface` ou `text-muted` qu'une fois, et ça marche dans les deux thèmes.
 
 **`apps/web/src/components/Header.tsx`** : exemple de **mobile first**. Le menu « bureau » est `hidden` par défaut et n'apparaît qu'à partir de `md:` (écrans de 768 px et plus).
+
+**`apps/web/src/lib/enhance.ts`** : toutes les interactions (sphère neuronale 3D, cartes qui s'inclinent, menu plein écran, surligneur du menu). C'est du JavaScript pur branché sur des attributs `data-*` : la sphère 3D est dessinée sans librairie, en faisant tourner des points avec des formules de rotation puis en les projetant en 2D avec une perspective (`x' = x × f / (f + z)`). C'est le principe de base de tous les moteurs 3D.
 
 ### Exercices pour s'approprier le code
 
