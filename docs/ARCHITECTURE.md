@@ -108,7 +108,7 @@ milestones (jalons libres)            vue "timeline" = events ∪ articles ∪ p
 | `photos` | Galeries | url (**null = emplacement vide**), storage_path, alt, caption, position, et un seul propriétaire parmi article / projet / événement |
 | `milestones` | Jalons de la timeline (rentrée, examens…) | title, description, happened_on |
 | `learning_logs` | Heures d'apprentissage (tableau de bord) | member_id, logged_on, hours, topic |
-| vue `timeline` | Timeline calculée, jamais saisie à la main | kind, id, slug, title, summary, date |
+| vue `timeline` | Timeline calculée, jamais saisie à la main | kind, id, slug, title, summary, date, cover_url, article_slug |
 
 Choix notables :
 - **UUID** comme clés : pas d'id devinable dans les URL, et l'app mobile pourra créer des objets hors ligne.
@@ -126,7 +126,7 @@ Choix notables :
 |---|---|---|
 | `/` | Accueil : accroche, équipe, derniers articles | ✅ étape 1 |
 | `/equipe` | Les 3 membres : photo, rôle, compétences, LinkedIn/GitHub | ✅ étape 1 |
-| `/timeline` | Progression mois par mois | ✅ étape 1 |
+| `/timeline` | Orbite 3D de l'année + frise interactive mois par mois | ✅ étape 1 |
 | `/articles` | Liste des articles | ✅ étape 1 |
 | `/articles/[slug]` | Un article + galerie | ✅ étape 1 |
 | `/projets` | Liste des projets | ✅ étape 1 (liste simple) |

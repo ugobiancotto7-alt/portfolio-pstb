@@ -18,7 +18,8 @@ const querySchema = z.object({
 timelineRouter.get("/", async (req, res) => {
   const { from, to } = querySchema.parse(req.query);
   const entries = await query<TimelineEntry>(
-    `select kind, id, slug, title, summary, date::text as date
+    `select kind, id, slug, title, summary, date::text as date,
+            cover_url as "coverUrl", article_slug as "articleSlug"
      from timeline
      where ($1::date is null or date >= $1) and ($2::date is null or date <= $2)
      order by date desc, kind`,

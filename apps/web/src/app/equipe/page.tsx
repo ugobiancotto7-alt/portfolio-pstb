@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import { SKILL_CATEGORIES } from "@pstb/shared";
 import { Avatar } from "@/components/Avatar";
@@ -22,6 +23,8 @@ export default async function TeamPage() {
           <article
             key={member.id}
             id={member.slug}
+            data-reveal
+            style={{ "--i": i } as CSSProperties}
             className="glass flex scroll-mt-28 flex-col overflow-hidden rounded-2xl"
           >
             <div data-tilt="6" className="relative aspect-[4/5] overflow-hidden bg-sunken">

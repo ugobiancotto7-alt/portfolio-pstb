@@ -13,7 +13,7 @@ export function SectionHeading({
   children?: ReactNode;
 }) {
   return (
-    <div className="mb-10 grid gap-4 md:grid-cols-[1fr_1fr] md:items-end">
+    <div data-reveal className="mb-10 grid gap-4 md:grid-cols-[1fr_1fr] md:items-end">
       <div>
         <p className="eyebrow">
           // {n} · {label}

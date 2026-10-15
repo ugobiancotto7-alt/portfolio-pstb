@@ -51,6 +51,8 @@
   --accent-2: #0891b2;
   --grid: rgb(11 13 26 / 0.05);
   --glow: rgb(79 70 229 / 0.18);
+  --star: 79 70 229; /* en clair, les "étoiles" deviennent de fines particules indigo */
+  --star-tint: 8 145 178;
   color-scheme: light;
 }
 
@@ -68,9 +70,38 @@
   --accent-2: #22d3ee;
   --grid: rgb(238 240 255 / 0.045);
   --glow: rgb(124 124 255 / 0.28);
+  --star: 226 232 255;
+  --star-tint: 34 211 238;
   color-scheme: dark;
 }
 
+/*
+ * Une zone "dark" à l'intérieur d'une page claire (le hero spatial, l'orbite) :
+ * les classes Tailwind (bg-bg, text-fg…) lisent --color-bg, --color-fg…, qui sont
+ * calculées une seule fois sur <html>. On les recalcule donc aussi sur chaque
+ * élément .dark, pour qu'elles suivent ses couleurs sombres.
+ */
+.dark {
+  --color-brand-400: var(--accent);
+  --color-brand-500: var(--accent);
+  --color-brand-600: var(--accent);
+  --color-brand-700: var(--accent);
+  --color-cyan: var(--accent-2);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
+}
+
+/* Coupe ce qui dépasse sur les côtés (fonds étoilés pleine largeur, cartes 3D) sans gêner position: sticky */
+html,
+body {
+  overflow-x: clip;
+}
 body {
   background: var(--bg);
   color: var(--fg);
@@ -130,26 +161,317 @@ h3 {
   will-change: transform;
 }
 
-/* Carte du tableau de bord : halo qui suit la souris (--mx/--my posés par lib/enhance.ts) */
-.metric-card::before {
+/*
+ * Halo qui suit la souris (--mx/--my posés par lib/effects/cards.ts).
+ * Le ::before est un calque par-dessus la carte, invisible tant qu'on ne survole pas.
+ */
+.spotlight::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s;
   background: radial-gradient(
-    260px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in oklab, var(--accent) 22%, transparent),
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in oklab, var(--accent) 20%, transparent),
     transparent 70%
   );
 }
-.metric-card:hover::before {
+.spotlight:hover::before {
   opacity: 1;
 }
-.metric-card > * {
-  position: relative;
+
+/* Apparition au défilement (lib/effects/scroll.ts). Sans JavaScript, rien n'est caché. */
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  translate: 0 28px;
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+    translate 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.reveal-ready [data-reveal][data-shown="true"] {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Chaque page arrive en fondu léger (app/template.tsx) */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+.page-enter {
+  animation: page-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Texte en contour seulement (les grands numéros de mois de la timeline) */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklab, var(--fg) 16%, transparent);
+}
+
+/* Barre qui défile horizontalement sans barre de défilement visible */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * Timeline 3D (lib/effects/timeline.ts) : --d va de -1 (haut de l'écran) à
+ * +1 (bas), --ad est sa valeur absolue. Une carte loin du centre est tournée
+ * et reculée ; elle se redresse face à nous en arrivant au milieu.
+ * --side vaut 1 pour les cartes de droite et -1 pour celles de gauche.
+ */
+.tl-swing {
+  transform: perspective(1200px) rotateX(calc(var(--d, 0) * 12deg))
+    rotateY(calc(var(--d, 0) * var(--side, 1) * var(--swing, -14deg))) translateZ(calc(var(--ad, 0) * -120px));
+  opacity: calc(1 - max(0, var(--ad, 0) - 0.55) * 1.4);
+  transform-origin: calc(50% - var(--side, 1) * 50%) 50%;
+  will-change: transform;
+}
+/* Sur mobile, toutes les cartes sont à droite de la ligne */
+@media (max-width: 767px) {
+  [data-tl-item] {
+    --side: 1 !important;
+    --swing: -7deg; /* rotation plus douce sur petit écran */
+  }
+}
+/* Le point sur la ligne s'allume quand sa carte passe le milieu de l'écran */
+[data-tl-item] .tl-node {
+  transition:
+    box-shadow 0.4s,
+    border-color 0.4s,
+    background-color 0.4s,
+    color 0.4s;
+}
+[data-tl-item][data-active="true"] .tl-node {
+  border-color: var(--accent-2);
+  background: color-mix(in oklab, var(--accent-2) 16%, var(--surface));
+  color: var(--accent-2);
+  box-shadow:
+    0 0 0 6px color-mix(in oklab, var(--accent-2) 10%, transparent),
+    0 0 24px var(--accent-2);
+}
+
+/* Petite planète décorative en CSS : un anneau incliné en 3D qui tourne */
+@keyframes orbit-spin {
+  to {
+    rotate: z 360deg;
+  }
+}
+.orbit-ring {
+  transform: rotateX(72deg);
+  transform-style: preserve-3d;
+}
+.orbit-ring > span {
+  animation: orbit-spin var(--speed, 14s) linear infinite;
+}
+
+/* Visionneuse photo plein écran (lib/effects/lightbox.ts) */
+dialog.lightbox {
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+}
+dialog.lightbox::backdrop {
+  background: rgb(4 5 10 / 0.92);
+  backdrop-filter: blur(10px);
+}
+dialog.lightbox[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: page-in 0.3s ease-out;
+}
+dialog.lightbox figure {
+  margin: 0;
+  max-width: min(92vw, 1100px);
+  pointer-events: none;
+}
+dialog.lightbox img {
+  max-height: 78dvh;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 14px;
+  opacity: 0;
+  scale: 0.96;
+  transition:
+    opacity 0.35s,
+    scale 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  box-shadow: 0 30px 120px -30px rgb(124 124 255 / 0.5);
+}
+dialog.lightbox img.is-in {
+  opacity: 1;
+  scale: 1;
+}
+dialog.lightbox figcaption {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: rgb(255 255 255 / 0.8);
+  text-align: center;
+}
+dialog.lightbox [data-lb-count] {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #22d3ee;
+}
+dialog.lightbox button {
+  position: absolute;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  background: rgb(255 255 255 / 0.06);
+  color: #fff;
+  border-radius: 999px;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+dialog.lightbox button:hover {
+  background: rgb(255 255 255 / 0.14);
+  border-color: #8b8bff;
+}
+dialog.lightbox [data-lb-prev],
+dialog.lightbox [data-lb-next] {
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  translate: 0 -50%;
+  font-size: 28px;
+  line-height: 1;
+}
+dialog.lightbox [data-lb-prev] {
+  left: 16px;
+}
+dialog.lightbox [data-lb-next] {
+  right: 16px;
+}
+dialog.lightbox [data-lb-close] {
+  top: 16px;
+  right: 16px;
+  padding: 6px 16px;
+  font-size: 14px;
+}
+dialog.lightbox kbd {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+/* Point lumineux qui circule/* Visionneuse photo plein écran (lib/effects/lightbox.ts) */
+dialog.lightbox {
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+}
+dialog.lightbox::backdrop {
+  background: rgb(4 5 10 / 0.92);
+  backdrop-filter: blur(10px);
+}
+dialog.lightbox[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: page-in 0.3s ease-out;
+}
+dialog.lightbox figure {
+  margin: 0;
+  max-width: min(92vw, 1100px);
+  pointer-events: none;
+}
+dialog.lightbox img {
+  max-height: 78dvh;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 14px;
+  opacity: 0;
+  scale: 0.96;
+  transition:
+    opacity 0.35s,
+    scale 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  box-shadow: 0 30px 120px -30px rgb(124 124 255 / 0.5);
+}
+dialog.lightbox img.is-in {
+  opacity: 1;
+  scale: 1;
+}
+dialog.lightbox figcaption {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: rgb(255 255 255 / 0.8);
+  text-align: center;
+}
+dialog.lightbox [data-lb-count] {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #22d3ee;
+}
+dialog.lightbox button {
+  position: absolute;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  background: rgb(255 255 255 / 0.06);
+  color: #fff;
+  border-radius: 999px;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+dialog.lightbox button:hover {
+  background: rgb(255 255 255 / 0.14);
+  border-color: #8b8bff;
+}
+dialog.lightbox [data-lb-prev],
+dialog.lightbox [data-lb-next] {
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  translate: 0 -50%;
+  font-size: 28px;
+  line-height: 1;
+}
+dialog.lightbox [data-lb-prev] {
+  left: 16px;
+}
+dialog.lightbox [data-lb-next] {
+  right: 16px;
+}
+dialog.lightbox [data-lb-close] {
+  top: 16px;
+  right: 16px;
+  padding: 6px 16px;
+  font-size: 14px;
+}
+dialog.lightbox kbd {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.6;
 }
 
 /* Point lumineux qui circule le long du pipeline */
@@ -217,7 +539,12 @@ h3 {
     animation: none !important;
     transition: none !important;
   }
-  [data-tilt] {
+  [data-tilt],
+  .tl-swing {
     transform: none !important;
+  }
+  .reveal-ready [data-reveal] {
+    opacity: 1;
+    translate: none;
   }
 }

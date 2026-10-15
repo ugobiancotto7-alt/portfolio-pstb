@@ -110,11 +110,17 @@ export function Header() {
             </button>
           </div>
         </div>
+        {/* Barre de lecture : se remplit pendant qu'on fait défiler la page */}
+        <div
+          data-scroll-progress
+          aria-hidden
+          className="absolute inset-x-0 -bottom-px h-px origin-left scale-x-0 bg-gradient-to-r from-brand-500 to-cyan"
+        />
       </header>
 
       {/* Menu plein écran (caché par défaut, ouvert par lib/enhance.ts) */}
       <div id="site-menu" data-menu hidden className="fixed inset-0 z-50 overflow-y-auto bg-bg/95 backdrop-blur-2xl">
-        <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
+        <canvas data-starfield="soft" className="pointer-events-none absolute inset-0 size-full" aria-hidden />
         <div className="relative mx-auto flex min-h-full max-w-6xl flex-col px-4 py-5 sm:px-6">
           <div className="flex items-center justify-between">
             <span className="eyebrow">// navigation</span>

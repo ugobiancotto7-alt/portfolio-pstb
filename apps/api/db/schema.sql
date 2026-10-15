@@ -211,16 +211,35 @@ create table learning_logs (
 -- security_invoker : la vue respecte les droits de celui qui l'interroge
 -- (sinon, sur Supabase, elle contournerait la sécurité RLS plus bas).
 create view timeline with (security_invoker = true) as
-  select 'event'::text as kind, e.id, e.slug, e.title, e.description as summary, e.starts_on as date
+  -- Un événement est illustré par sa première photo ; à défaut, par une photo
+  -- de son compte rendu qui n'est PAS la couverture de l'article (pour ne pas
+  -- afficher deux fois la même image dans la timeline).
+  select 'event'::text as kind, e.id, e.slug, e.title, e.description as summary, e.starts_on as date,
+         coalesce(
+           (select p.url from photos p
+             where p.event_id = e.id and p.url is not null
+             order by p.position limit 1),
+           (select p.url from photos p
+             where p.article_id = ea.id and p.url is not null and p.url is distinct from ea.cover_url
+             order by p.position limit 1)
+         ) as cover_url,
+         ea.slug as article_slug
   from events e
+  -- "lateral" : pour chaque événement, on va chercher SON premier compte rendu publié
+  left join lateral (
+    select a.id, a.slug, a.cover_url from articles a
+    where a.event_id = e.id and a.status = 'published'
+    order by a.published_at
+    limit 1
+  ) ea on true
   union all
-  select 'article', a.id, a.slug, a.title, a.excerpt, a.published_at::date
+  select 'article', a.id, a.slug, a.title, a.excerpt, a.published_at::date, a.cover_url, a.slug
   from articles a where a.status = 'published'
   union all
-  select 'project', p.id, p.slug, p.title, p.summary, coalesce(p.started_on, p.created_at::date)
+  select 'project', p.id, p.slug, p.title, p.summary, coalesce(p.started_on, p.created_at::date), p.cover_url, null
   from projects p where p.status = 'published'
   union all
-  select 'milestone', m.id, null, m.title, m.description, m.happened_on
+  select 'milestone', m.id, null, m.title, m.description, m.happened_on, null, null
   from milestones m;
 
 -- ---------------------------------------------------------------------

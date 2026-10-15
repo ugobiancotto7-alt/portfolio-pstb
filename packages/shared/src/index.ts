@@ -140,6 +140,10 @@ export interface TimelineEntry {
   title: string;
   summary: string | null;
   date: string;
+  /** Image d'illustration (couverture, ou une photo de l'événement), null si aucune */
+  coverUrl: string | null;
+  /** L'article qui raconte cette entrée : lui-même pour un article, le compte rendu pour un événement */
+  articleSlug: string | null;
 }
 
 /** Une liste paginée : même forme pour toutes les listes de l'API. */

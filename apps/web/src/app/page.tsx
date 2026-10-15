@@ -1,12 +1,12 @@
 /**
  * Page d'accueil, style "IA / business" :
- *   1. hero : texte à gauche, sphère neuronale 3D interactive à droite
+ *   1. hero dans l'espace : texte à gauche, planète neuronale 3D à droite, ciel étoilé
  *   2. tableau de bord : 4 cartes cliquables avec chiffres animés
  *   3. notre méthode présentée comme un pipeline de données (cartes qui zooment)
  *   4. l'équipe (cartes qui s'inclinent en 3D sous la souris)
  *   5. le dernier compte rendu
  *   6. quelques moments en images
- *   7. bandeau final
+ *   7. bandeau final avec la jauge de l'année
  *
  * C'est un Server Component : il est "async" et appelle l'API avant
  * d'envoyer le HTML. Les animations sont ajoutées ensuite par lib/enhance.ts.
@@ -26,13 +26,19 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import type { CSSProperties } from "react";
 import { Avatar } from "@/components/Avatar";
 import { Container } from "@/components/Container";
 import { SectionHeading } from "@/components/SectionHeading";
+import { Starfield } from "@/components/Starfield";
+import { YearGauge } from "@/components/YearGauge";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
+import { ofMonth, schoolYear } from "@/lib/year";
 
 const pad = (n: number) => String(n).padStart(2, "0");
+/** Décalage d'animation en cascade, lu par le CSS de data-reveal */
+const delay = (i: number) => ({ "--i": i }) as CSSProperties;
 
 // Les 5 étapes d'un projet data, de la donnée brute au modèle surveillé
 const pipeline = [
@@ -44,7 +50,14 @@ const pipeline = [
 ];
 
 export default async function HomePage() {
-  const [members, articles, stats] = await Promise.all([api.members(), api.articles(), api.stats()]);
+  const [members, articles, stats, events] = await Promise.all([
+    api.members(),
+    api.articles(),
+    api.stats(),
+    api.events(),
+  ]);
+  const year = schoolYear();
+  const eventMonths = new Set(events.map((e) => e.startsOn.slice(0, 7)));
   const latest = articles.items[0];
   const latestFull = latest ? await api.article(latest.slug) : null;
   const photos = latestFull?.photos.filter((p) => p.url) ?? [];
@@ -81,12 +94,19 @@ export default async function HomePage() {
       href: "/timeline",
       detail: event ? `${event.title} · ${formatDate(event.startsOn)}` : "Bientôt",
       visual: (
-        <div className="flex items-center gap-1" aria-hidden>
-          {/* Une mini-frise de l'année : un trait par mois, le mois de l'événement allumé */}
-          {Array.from({ length: 10 }, (_, k) => (
+        <div className="flex items-end gap-1" aria-hidden>
+          {/* Une mini-frise de l'année : un trait par mois, ceux qui ont eu un événement s'allument */}
+          {year.months.map((m, k) => (
             <span
-              key={k}
-              className={`h-6 flex-1 rounded-sm ${k === 1 ? "bg-cyan shadow-[0_0_10px_var(--accent-2)]" : "bg-border"}`}
+              key={m.key}
+              className={`flex-1 rounded-sm transition-all duration-500 ${
+                eventMonths.has(m.key)
+                  ? "h-7 bg-cyan shadow-[0_0_10px_var(--accent-2)]"
+                  : m.future
+                    ? "h-3 bg-border/60 group-hover:h-4"
+                    : "h-4 bg-brand-500/40 group-hover:h-5"
+              }`}
+              style={{ transitionDelay: `${k * 25}ms` }}
             />
           ))}
         </div>
@@ -131,8 +151,8 @@ export default async function HomePage() {
   return (
     <>
       {/* 1. HERO */}
-      <section className="relative overflow-hidden border-b border-border">
-        <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
+      {/* La classe "dark" force les couleurs sombres ici, même en thème clair : c'est l'espace. */}
+      <section className="dark relative overflow-hidden border-b border-border bg-bg text-fg">
         {/* Halos de couleur flous en fond */}
         <div
           className="pointer-events-none absolute -left-40 top-10 size-[520px] rounded-full bg-brand-500/20 blur-3xl"
@@ -142,14 +162,16 @@ export default async function HomePage() {
           className="pointer-events-none absolute -right-20 bottom-0 size-[420px] rounded-full bg-cyan/10 blur-3xl"
           aria-hidden
         />
+        {/* Le ciel étoilé, par-dessus les halos de couleur (qui font office de nébuleuses) */}
+        <Starfield />
 
-        <Container className="relative grid items-center gap-6 py-14 lg:grid-cols-[1.1fr_1fr] lg:py-20">
+        <Container className="relative grid items-center gap-6 py-14 lg:grid-cols-[1.15fr_1fr] lg:py-20">
           <div>
             <p className="glass inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-muted">
               <span className="size-1.5 animate-pulse rounded-full bg-cyan" aria-hidden />
-              Bachelor Data &amp; IA · PSTB · 2026-2027
+              Bachelor Data &amp; IA · PSTB · {year.label}
             </p>
-            <h1 className="mt-6 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-7xl">
+            <h1 className="mt-6 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-[3.6rem] xl:text-[4rem]">
               Apprendre la data.
               <br />
               <span className="text-gradient">Construire l&apos;IA.</span>
@@ -176,18 +198,23 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* La sphère 3D : un <canvas> animé par lib/enhance.ts */}
+          {/*
+            La planète 3D : un <canvas> animé par lib/effects/planet.ts.
+            Il déborde de 15 % de chaque côté pour laisser de la place à l'anneau.
+            touch-pan-y : sur mobile, glisser verticalement fait toujours défiler la page.
+          */}
           <div className="relative mx-auto aspect-square w-full max-w-[520px]">
             <canvas
               data-neural
-              className="h-full w-full cursor-grab touch-none"
-              aria-label="Réseau de neurones en 3D, animé"
+              className="absolute -left-[15%] -top-[15%] h-[130%] w-[130%] cursor-grab touch-pan-y"
+              aria-label="Planète formée d'un réseau de neurones en 3D, avec un point sur Paris : nous sommes ici"
             />
-            <span className="glass absolute left-2 top-8 rounded-lg px-3 py-2 font-mono text-[11px] text-muted">
+            <span className="glass absolute left-2 top-8 hidden rounded-lg px-3 py-2 font-mono text-[11px] text-muted sm:block">
               <span className="text-cyan">●</span> model.status = <span className="text-fg">&quot;learning&quot;</span>
             </span>
             <span className="glass absolute bottom-10 right-2 rounded-lg px-3 py-2 font-mono text-[11px] text-muted">
-              epoch <span className="text-fg">02/12</span> · mois d&apos;octobre
+              epoch <span className="text-fg">{pad(year.currentIndex + 1)}/12</span> · mois{" "}
+              {ofMonth(year.months[year.currentIndex].name)}
             </span>
           </div>
         </Container>
@@ -196,12 +223,12 @@ export default async function HomePage() {
         <Container className="relative pb-12">
           <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {metrics.map(({ icon: Icon, label, value, href, detail, visual }, i) => (
-              <li key={label}>
+              <li key={label} data-reveal style={delay(i)}>
                 <Link
                   href={href}
                   data-spotlight
                   data-tilt="8"
-                  className="metric-card group glass relative flex h-full flex-col overflow-hidden rounded-2xl p-4 transition duration-300 hover:-translate-y-1 hover:border-brand-500 sm:p-5"
+                  className="spotlight group glass relative flex h-full flex-col overflow-hidden rounded-2xl p-4 transition duration-300 hover:-translate-y-1 hover:border-brand-500 sm:p-5"
                 >
                   <div className="flex items-center justify-between">
                     <span className="inline-flex size-9 items-center justify-center rounded-xl border border-border bg-sunken text-brand-500 transition group-hover:border-brand-500 group-hover:text-cyan">
@@ -241,6 +268,8 @@ export default async function HomePage() {
             {pipeline.map(({ icon: Icon, step, text }, i) => (
               <li
                 key={step}
+                data-reveal
+                style={delay(i)}
                 className="group glass relative rounded-2xl p-5 transition duration-300 hover:z-10 hover:scale-[1.06] hover:border-brand-500 hover:shadow-[0_24px_60px_-24px_var(--glow)]"
               >
                 <div className="flex items-center justify-between">
@@ -264,38 +293,39 @@ export default async function HomePage() {
         </SectionHeading>
         <div className="grid gap-6 sm:grid-cols-3">
           {members.map((m, i) => (
-            <Link
-              key={m.id}
-              href={`/equipe#${m.slug}`}
-              data-tilt="10"
-              className="group glass glow block overflow-hidden rounded-2xl"
-            >
-              <div className="relative aspect-[4/5] overflow-hidden">
-                {m.avatarUrl && (
-                  <Image
-                    src={m.avatarUrl}
-                    alt={m.firstName}
-                    fill
-                    sizes="(min-width: 640px) 33vw, 100vw"
-                    className="object-cover transition duration-500 group-hover:scale-105"
+            <div key={m.id} data-reveal style={delay(i)}>
+              <Link
+                href={`/equipe#${m.slug}`}
+                data-tilt="10"
+                className="group glass glow block overflow-hidden rounded-2xl"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden">
+                  {m.avatarUrl && (
+                    <Image
+                      src={m.avatarUrl}
+                      alt={m.firstName}
+                      fill
+                      sizes="(min-width: 640px) 33vw, 100vw"
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                    />
+                  )}
+                  <div
+                    className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"
+                    aria-hidden
                   />
-                )}
-                <div
-                  className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"
-                  aria-hidden
-                />
-                <span className="absolute left-4 top-4 rounded-full bg-black/40 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-white backdrop-blur">
-                  {pad(i + 1)} / {pad(members.length)}
-                </span>
-                <div className="absolute inset-x-4 bottom-4 flex items-end justify-between text-white">
-                  <div>
-                    <p className="text-2xl font-semibold tracking-tight">{m.firstName}</p>
-                    <p className="text-xs text-white/70">{m.role}</p>
+                  <span className="absolute left-4 top-4 rounded-full bg-black/40 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-white backdrop-blur">
+                    {pad(i + 1)} / {pad(members.length)}
+                  </span>
+                  <div className="absolute inset-x-4 bottom-4 flex items-end justify-between text-white">
+                    <div>
+                      <p className="text-2xl font-semibold tracking-tight">{m.firstName}</p>
+                      <p className="text-xs text-white/70">{m.role}</p>
+                    </div>
+                    <ArrowUpRight className="size-5 opacity-0 transition group-hover:opacity-100" />
                   </div>
-                  <ArrowUpRight className="size-5 opacity-0 transition group-hover:opacity-100" />
                 </div>
-              </div>
-            </Link>
+              </Link>
+            </div>
           ))}
         </div>
       </Container>
@@ -306,6 +336,7 @@ export default async function HomePage() {
           <SectionHeading n="03" label="Dernier article" title="Sur le terrain." />
           <Link
             href={`/articles/${latest.slug}`}
+            data-reveal
             className="group glass glow grid overflow-hidden rounded-3xl md:grid-cols-2"
           >
             <div className="relative aspect-[4/3] overflow-hidden md:aspect-auto md:min-h-[380px]">
@@ -339,7 +370,7 @@ export default async function HomePage() {
           </SectionHeading>
           <ul className="grid gap-4 sm:grid-cols-3">
             {moments.map((p, i) => (
-              <li key={p.id}>
+              <li key={p.id} data-reveal style={delay(i)}>
                 <Link
                   href={`/articles/${latest.slug}#galerie`}
                   className="group block overflow-hidden rounded-2xl border border-border"
@@ -368,33 +399,39 @@ export default async function HomePage() {
         </Container>
       )}
 
-      {/* 7. BANDEAU FINAL */}
+      {/* 7. BANDEAU FINAL : le ciel étoilé + la jauge de l'année */}
       <Container className="mt-28">
-        <div className="relative overflow-hidden rounded-3xl border border-border px-6 py-16 sm:px-14 sm:py-20">
-          <div className="bg-grid pointer-events-none absolute inset-0" aria-hidden />
+        <div
+          data-reveal
+          className="dark relative overflow-hidden rounded-3xl border border-border bg-bg px-6 py-14 text-fg sm:px-14 sm:py-16"
+        >
           <div
             className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-brand-500/25 blur-3xl"
             aria-hidden
           />
-          <div className="relative">
-            <p className="eyebrow">// la suite</p>
-            <h2 className="mt-4 max-w-2xl font-display text-4xl leading-[1.05] sm:text-6xl">
-              Suivez notre progression, <span className="text-gradient">mois après mois.</span>
-            </h2>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link
-                href="/timeline"
-                className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-on-ink transition hover:opacity-90"
-              >
-                Ouvrir la timeline
-              </Link>
-              <Link
-                href="/articles"
-                className="glass rounded-full px-6 py-3 text-sm font-semibold transition hover:border-brand-500"
-              >
-                Lire les articles
-              </Link>
+          <Starfield />
+          <div className="relative grid items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
+            <div>
+              <p className="eyebrow">// la suite</p>
+              <h2 className="mt-4 max-w-2xl font-display text-4xl leading-[1.05] sm:text-6xl">
+                Suivez notre progression, <span className="text-gradient">mois après mois.</span>
+              </h2>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link
+                  href="/timeline"
+                  className="rounded-full bg-ink px-6 py-3 text-sm font-semibold text-on-ink transition hover:opacity-90"
+                >
+                  Ouvrir la timeline
+                </Link>
+                <Link
+                  href="/articles"
+                  className="glass rounded-full px-6 py-3 text-sm font-semibold transition hover:border-brand-500"
+                >
+                  Lire les articles
+                </Link>
+              </div>
             </div>
+            <YearGauge />
           </div>
         </div>
       </Container>
