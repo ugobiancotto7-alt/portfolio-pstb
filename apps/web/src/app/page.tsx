@@ -5,7 +5,7 @@
  *   3. notre méthode présentée comme un pipeline de données (cartes qui zooment)
  *   4. l'équipe (cartes qui s'inclinent en 3D sous la souris)
  *   5. le dernier compte rendu
- *   6. quelques moments en images
+ *   6. toutes les photos, dans une bande 3D qu'on fait glisser
  *   7. bandeau final avec la jauge de l'année
  *
  * C'est un Server Component : il est "async" et appelle l'API avant
@@ -15,6 +15,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Activity,
+  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   BrainCircuit,
@@ -61,7 +62,8 @@ export default async function HomePage() {
   const latest = articles.items[0];
   const latestFull = latest ? await api.article(latest.slug) : null;
   const photos = latestFull?.photos.filter((p) => p.url) ?? [];
-  const moments = photos.slice(2, 5); // 3 photos différentes de la couverture
+  // Toutes les photos de l'événement, sauf la couverture (déjà affichée avec le dernier article)
+  const moments = photos.filter((p) => p.url !== latest?.coverUrl);
 
   const event = latestFull?.event ?? null;
   const articleHref = latest ? `/articles/${latest.slug}` : "/articles";
@@ -362,41 +364,74 @@ export default async function HomePage() {
         </Container>
       )}
 
-      {/* 6. MOMENTS */}
-      {moments.length > 0 && latest && (
-        <Container className="mt-28">
-          <SectionHeading n="04" label="En images" title="Quelques moments.">
-            Les photos de nos événements, ajoutées par l&apos;équipe.
-          </SectionHeading>
-          <ul className="grid gap-4 sm:grid-cols-3">
-            {moments.map((p, i) => (
-              <li key={p.id} data-reveal style={delay(i)}>
-                <Link
-                  href={`/articles/${latest.slug}#galerie`}
-                  className="group block overflow-hidden rounded-2xl border border-border"
-                >
-                  <div className="relative aspect-[3/4] overflow-hidden">
+      {/* 6. EN IMAGES : toutes les photos, dans une bande 3D qu'on fait glisser */}
+      {moments.length > 0 && (
+        <section className="mt-28">
+          <Container>
+            <SectionHeading n="04" label="En images" title="La journée en photos.">
+              Faites glisser la bande, cliquez sur une photo pour l&apos;ouvrir en grand.
+            </SectionHeading>
+          </Container>
+          <div data-carousel data-reveal className="relative">
+            <ul
+              data-carousel-track
+              data-lightbox
+              className="no-scrollbar flex cursor-grab snap-x snap-mandatory gap-4 overflow-x-auto px-[max(1rem,calc(50vw-36rem+1.5rem))] py-6 [scroll-padding-inline:max(1rem,calc(50vw-36rem+1.5rem))]"
+            >
+              {moments.map((p, i) => (
+                <li key={p.id} className="w-[72vw] shrink-0 snap-center sm:w-[300px]">
+                  <div
+                    data-full={p.url!}
+                    data-caption={p.caption ?? p.alt}
+                    className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-border shadow-[0_30px_60px_-30px_var(--glow)]"
+                  >
                     <Image
                       src={p.url!}
                       alt={p.alt}
                       fill
-                      sizes="(min-width: 640px) 33vw, 100vw"
-                      className="object-cover transition duration-700 group-hover:scale-110"
+                      draggable={false}
+                      sizes="(min-width: 640px) 300px, 72vw"
+                      className="object-cover transition duration-700 group-hover:scale-105"
                     />
                     <div
                       className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent"
                       aria-hidden
                     />
                     <p className="absolute inset-x-4 bottom-4 text-sm text-white">
-                      <span className="mr-2 font-mono text-xs text-white/60">{pad(i + 1)}</span>
+                      <span className="mr-2 font-mono text-xs text-white/60">
+                        {pad(i + 1)}/{pad(moments.length)}
+                      </span>
                       {p.caption}
                     </p>
                   </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Container>
+                </li>
+              ))}
+            </ul>
+            <Container className="flex items-center justify-between">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-muted">
+                {pad(moments.length)} photos · {latest?.title}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  data-carousel-prev
+                  aria-label="Photos précédentes"
+                  className="glass flex size-11 items-center justify-center rounded-full transition hover:border-brand-500"
+                >
+                  <ArrowLeft className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  data-carousel-next
+                  aria-label="Photos suivantes"
+                  className="glass flex size-11 items-center justify-center rounded-full transition hover:border-brand-500"
+                >
+                  <ArrowRight className="size-4" />
+                </button>
+              </div>
+            </Container>
+          </div>
+        </section>
       )}
 
       {/* 7. BANDEAU FINAL : le ciel étoilé + la jauge de l'année */}

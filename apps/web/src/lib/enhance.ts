@@ -14,9 +14,11 @@
  *   cards.ts       data-tilt, data-spotlight                   cartes au survol
  *   scroll.ts      data-reveal, data-count                     animations au défilement
  *   lightbox.ts    data-lightbox                               visionneuse photo plein écran
+ *   carousel.ts    data-carousel                               bande de photos en 3D (accueil)
  *   navigation.ts  data-nav, data-menu, data-scroll-progress, data-scroll-to
  */
 import { mountSpotlight, mountTilt } from "./effects/cards";
+import { mountCarousel } from "./effects/carousel";
 import { mountMenu, mountNavIndicator, mountScrollProgress, mountScrollTo } from "./effects/navigation";
 import { mountLightbox } from "./effects/lightbox";
 import { mountPlanet } from "./effects/planet";
@@ -35,6 +37,7 @@ const effects: [string, (el: HTMLElement) => void][] = [
   ["[data-spotlight]", mountSpotlight],
   ["[data-reveal]", mountReveal],
   ["[data-count]", mountCountUp],
+  ["[data-carousel]", mountCarousel],
   ["[data-lightbox]", mountLightbox],
   ["[data-nav]", mountNavIndicator],
   ["[data-menu]", mountMenu],

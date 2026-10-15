@@ -260,6 +260,16 @@ h3 {
     0 0 24px var(--accent-2);
 }
 
+/*
+ * Bande de photos "coverflow" (lib/effects/carousel.ts) : --c va de -1 (à gauche)
+ * à +1 (à droite). Les photos s'orientent vers le centre et rapetissent un peu.
+ */
+[data-carousel-track] > * {
+  transform: perspective(1000px) rotateY(calc(var(--c, 0) * -24deg)) scale(calc(1 - var(--ac, 0) * 0.12));
+  opacity: calc(1 - max(0, var(--ac, 0) - 0.85) * 1.1);
+  will-change: transform;
+}
+
 /* Petite planète décorative en CSS : un anneau incliné en 3D qui tourne */
 @keyframes orbit-spin {
   to {
@@ -540,7 +550,8 @@ dialog.lightbox kbd {
     transition: none !important;
   }
   [data-tilt],
-  .tl-swing {
+  .tl-swing,
+  [data-carousel-track] > * {
     transform: none !important;
   }
   .reveal-ready [data-reveal] {

@@ -101,13 +101,18 @@ from articles a
 cross join (values
   ('/photos/datadog-summit/01-scene-pleniere.jpg', 'La grande salle pendant la plénière', 'La plénière du Datadog Summit Paris', 1),
   ('/photos/datadog-summit/02-stack-ia.jpg', 'Diapositive sur l''observabilité de la stack IA', 'Keynote : observabilité et sécurité sur toute la stack IA', 2),
-  ('/photos/datadog-summit/03-modal.jpg', 'Diapositive du témoignage de Modal', 'Modal : 96 % des problèmes résolus avant d''affecter les clients', 3),
-  ('/photos/datadog-summit/04-amex-gbt.jpg', 'Présentation d''Amex GBT sur scène', 'Amex GBT : l''IA pour accélérer la résolution d''incidents', 4),
-  ('/photos/datadog-summit/05-plateforme.jpg', 'Orateur sur scène devant l''écran géant', 'La plateforme de décision, d''action et d''automatisation', 5),
-  ('/photos/datadog-summit/06-workshops.jpg', 'Écran annonçant les workshops', 'Le programme des workshops de l''après-midi', 6),
-  ('/photos/datadog-summit/08-portrait-1.jpg', 'Tim devant le totem Datadog Summit', 'Tim devant le totem du Datadog Summit', 7),
-  ('/photos/datadog-summit/09-portrait-2.jpg', 'Ugo devant le totem Datadog Summit', 'Ugo devant le totem du Datadog Summit', 8),
-  ('/photos/datadog-summit/10-portrait-3.jpg', 'Marcelo devant le totem Datadog Summit', 'Marcelo devant le totem du Datadog Summit', 9)
+  ('/photos/datadog-summit/02b-stack-ia-salle.jpg', 'La keynote vue depuis les gradins', 'La keynote sur la stack IA, depuis les gradins', 3),
+  ('/photos/datadog-summit/03-modal.jpg', 'Diapositive du témoignage de Modal', 'Modal : 96 % des problèmes résolus avant d''affecter les clients', 4),
+  ('/photos/datadog-summit/03b-modal-ecran.jpg', 'L''écran du témoignage de Modal en gros plan', 'Le témoignage de Modal, vu de plus près', 5),
+  ('/photos/datadog-summit/04-amex-gbt.jpg', 'Présentation d''Amex GBT sur scène', 'Amex GBT : l''IA pour accélérer la résolution d''incidents', 6),
+  ('/photos/datadog-summit/05-plateforme.jpg', 'Orateur sur scène devant l''écran géant', 'La plateforme de décision, d''action et d''automatisation', 7),
+  ('/photos/datadog-summit/06-workshops.jpg', 'Écran annonçant les workshops', 'Le programme des workshops de l''après-midi', 8),
+  ('/photos/datadog-summit/07-entree-ugo.jpg', 'Ugo dans le hall d''entrée, près du totem', 'Ugo dans le hall d''entrée du Summit', 9),
+  ('/photos/datadog-summit/08-portrait-1.jpg', 'Tim devant le totem Datadog Summit', 'Tim devant le totem du Datadog Summit', 10),
+  ('/photos/datadog-summit/08b-portrait-tim.jpg', 'Tim devant le totem Datadog Summit, deuxième photo', 'Tim, deuxième prise devant le totem', 11),
+  ('/photos/datadog-summit/09-portrait-2.jpg', 'Ugo devant le totem Datadog Summit', 'Ugo devant le totem du Datadog Summit', 12),
+  ('/photos/datadog-summit/10-portrait-3.jpg', 'Marcelo devant le totem Datadog Summit', 'Marcelo devant le totem du Datadog Summit', 13),
+  ('/photos/datadog-summit/10b-portrait-marcelo.jpg', 'Marcelo devant le totem Datadog Summit, deuxième photo', 'Marcelo, deuxième prise devant le totem', 14)
 ) as p(url, alt, caption, position)
 where a.slug = 'compte-rendu-datadog-summit-paris-2026';
 
