@@ -83,7 +83,6 @@ De 14h30 à 17h30, trois ateliers pratiques étaient proposés :
 3. **Tester un outil d'observabilité** sur un mini-projet (la plupart proposent une offre gratuite ou étudiante).
 4. **Continuer à aller à des événements** : on a appris autant en une journée qu'en plusieurs heures de lecture, et ça donne des idées de projets.
 
-*Galerie : les photos de la journée arrivent bientôt.*
 $md$
 from events e
 where e.slug = 'datadog-summit-paris-2026';
@@ -93,11 +92,31 @@ select a.id, m.id
 from articles a cross join members m
 where a.slug = 'compte-rendu-datadog-summit-paris-2026';
 
--- ----- Galerie : 6 emplacements vides (url = null) à remplir via l'admin
-insert into photos (article_id, alt, position)
-select a.id, 'Photo à venir', g.n
-from articles a cross join generate_series(1, 6) as g(n)
+-- ----- Galerie : les photos de la journée (servies par le site dans
+-- apps/web/public/photos ; plus tard, l'admin les enverra sur Supabase Storage).
+-- Les 2 dernières lignes restent des emplacements vides (url = null).
+insert into photos (article_id, url, alt, caption, position)
+select a.id, p.url, p.alt, p.caption, p.position
+from articles a
+cross join (values
+  ('/photos/datadog-summit/01-scene-pleniere.jpg', 'La grande salle pendant la plénière', 'La plénière du Datadog Summit Paris', 1),
+  ('/photos/datadog-summit/02-stack-ia.jpg', 'Diapositive sur l''observabilité de la stack IA', 'Keynote : observabilité et sécurité sur toute la stack IA', 2),
+  ('/photos/datadog-summit/03-modal.jpg', 'Diapositive du témoignage de Modal', 'Modal : 96 % des problèmes résolus avant d''affecter les clients', 3),
+  ('/photos/datadog-summit/04-amex-gbt.jpg', 'Présentation d''Amex GBT sur scène', 'Amex GBT : l''IA pour accélérer la résolution d''incidents', 4),
+  ('/photos/datadog-summit/05-plateforme.jpg', 'Orateur sur scène devant l''écran géant', 'La plateforme de décision, d''action et d''automatisation', 5),
+  ('/photos/datadog-summit/06-workshops.jpg', 'Écran annonçant les workshops', 'Le programme des workshops de l''après-midi', 6),
+  ('/photos/datadog-summit/07-totem-entree.jpg', 'Un membre de l''équipe à l''entrée du Summit', 'À l''entrée du Summit', 7),
+  ('/photos/datadog-summit/08-portrait-1.jpg', 'Un membre de l''équipe devant le totem Datadog Summit', 'Devant le totem du Datadog Summit', 8),
+  ('/photos/datadog-summit/09-portrait-2.jpg', 'Un membre de l''équipe devant le totem Datadog Summit', 'Devant le totem du Datadog Summit', 9),
+  ('/photos/datadog-summit/10-portrait-3.jpg', 'Un membre de l''équipe devant le totem Datadog Summit', 'Devant le totem du Datadog Summit', 10),
+  (null, 'Photo à venir', null, 11),
+  (null, 'Photo à venir', null, 12)
+) as p(url, alt, caption, position)
 where a.slug = 'compte-rendu-datadog-summit-paris-2026';
+
+-- Image de couverture de l'article (affichée sur les cartes)
+update articles set cover_url = '/photos/datadog-summit/02-stack-ia.jpg'
+where slug = 'compte-rendu-datadog-summit-paris-2026';
 
 -- ----- Un premier jalon pour la timeline
 insert into milestones (title, description, happened_on) values

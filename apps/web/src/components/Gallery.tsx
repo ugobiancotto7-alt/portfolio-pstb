@@ -16,7 +16,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
       </h2>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {photos.map((photo) => (
-          <li key={photo.id} className="relative aspect-[4/3] overflow-hidden rounded-xl">
+          <li key={photo.id} className="relative aspect-[3/4] overflow-hidden rounded-xl">
             {photo.url ? (
               <figure className="h-full">
                 <Image
