@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -24,9 +25,12 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-        <Link href="/" className="font-bold tracking-tight" onClick={() => setOpen(false)}>
-          <span className="bg-gradient-to-r from-brand-500 to-accent-500 bg-clip-text text-transparent">PSTB</span>{" "}
+        <Link href="/" className="flex items-center gap-2 font-bold tracking-tight" onClick={() => setOpen(false)}>
+          <Image src="/pstb-logo.jpg" alt="" width={32} height={32} className="rounded-md" priority />
+          <span>
+            <span className="bg-gradient-to-r from-brand-500 to-accent-500 bg-clip-text text-transparent">PSTB</span>{" "}
           Data &amp; IA
+          </span>
         </Link>
 
         {/* Navigation "bureau" : cachée sur mobile (mobile first : hidden, puis md:flex) */}
