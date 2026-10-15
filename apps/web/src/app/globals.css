@@ -1,0 +1,78 @@
+/*
+ * Tailwind CSS v4 : la configuration se fait directement dans le CSS.
+ */
+@import "tailwindcss";
+
+/* Le mode sombre s'active quand <html> a la classe "dark" (posée par next-themes). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Nos couleurs, inspirées du logo PSTB (indigo -> violet).
+ * Chaque variable devient une classe Tailwind : bg-surface, text-muted, etc.
+ */
+@theme {
+  --color-brand-50: #eef0ff;
+  --color-brand-100: #e0e3ff;
+  --color-brand-400: #8b8ff8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #5145cd;
+  --color-brand-700: #4338ca;
+  --color-accent-500: #a855f7;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+}
+
+/* Valeurs en mode clair… */
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --border: #e4e4e7;
+  --fg: #18181b;
+  --muted: #52525b;
+  color-scheme: light;
+}
+
+/* …et en mode sombre. Les composants n'ont rien à changer. */
+.dark {
+  --bg: #0b0b12;
+  --surface: #15151f;
+  --border: #2a2a38;
+  --fg: #f4f4f5;
+  --muted: #a1a1aa;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* Styles du contenu Markdown des articles */
+.prose-article h2 {
+  @apply mt-10 mb-3 text-2xl font-bold tracking-tight;
+}
+.prose-article h3 {
+  @apply mt-6 mb-2 text-lg font-semibold;
+}
+.prose-article p {
+  @apply my-4 leading-7;
+}
+.prose-article ul {
+  @apply my-4 list-disc space-y-2 pl-6;
+}
+.prose-article ol {
+  @apply my-4 list-decimal space-y-2 pl-6;
+}
+.prose-article a {
+  @apply text-brand-600 underline underline-offset-2 dark:text-brand-400;
+}
+.prose-article strong {
+  @apply font-semibold text-fg;
+}
+.prose-article li {
+  @apply leading-7;
+}

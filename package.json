@@ -1,0 +1,21 @@
+{
+  "name": "portfolio-pstb",
+  "private": true,
+  "description": "Portfolio / journal de bord de Ugo, Tim et Marcelo (Bachelor Data & IA, PSTB)",
+  "workspaces": [
+    "packages/*",
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/api & npm run dev --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "db:reset": "npm run db:reset --workspace=apps/api",
+    "build": "npm run build --workspace=apps/web",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
