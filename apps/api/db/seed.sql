@@ -94,7 +94,7 @@ where a.slug = 'compte-rendu-datadog-summit-paris-2026';
 
 -- ----- Galerie : les photos de la journée (servies par le site dans
 -- apps/web/public/photos ; plus tard, l'admin les enverra sur Supabase Storage).
--- Les 2 dernières lignes restent des emplacements vides (url = null).
+-- Pour ajouter un emplacement vide à remplir plus tard : une ligne avec url = null.
 insert into photos (article_id, url, alt, caption, position)
 select a.id, p.url, p.alt, p.caption, p.position
 from articles a
@@ -105,12 +105,9 @@ cross join (values
   ('/photos/datadog-summit/04-amex-gbt.jpg', 'Présentation d''Amex GBT sur scène', 'Amex GBT : l''IA pour accélérer la résolution d''incidents', 4),
   ('/photos/datadog-summit/05-plateforme.jpg', 'Orateur sur scène devant l''écran géant', 'La plateforme de décision, d''action et d''automatisation', 5),
   ('/photos/datadog-summit/06-workshops.jpg', 'Écran annonçant les workshops', 'Le programme des workshops de l''après-midi', 6),
-  ('/photos/datadog-summit/07-totem-entree.jpg', 'Ugo à l''entrée du Summit', 'Ugo à l''entrée du Summit', 7),
-  ('/photos/datadog-summit/08-portrait-1.jpg', 'Tim devant le totem Datadog Summit', 'Tim devant le totem du Datadog Summit', 8),
-  ('/photos/datadog-summit/09-portrait-2.jpg', 'Ugo devant le totem Datadog Summit', 'Ugo devant le totem du Datadog Summit', 9),
-  ('/photos/datadog-summit/10-portrait-3.jpg', 'Marcelo devant le totem Datadog Summit', 'Marcelo devant le totem du Datadog Summit', 10),
-  (null, 'Photo à venir', null, 11),
-  (null, 'Photo à venir', null, 12)
+  ('/photos/datadog-summit/08-portrait-1.jpg', 'Tim devant le totem Datadog Summit', 'Tim devant le totem du Datadog Summit', 7),
+  ('/photos/datadog-summit/09-portrait-2.jpg', 'Ugo devant le totem Datadog Summit', 'Ugo devant le totem du Datadog Summit', 8),
+  ('/photos/datadog-summit/10-portrait-3.jpg', 'Marcelo devant le totem Datadog Summit', 'Marcelo devant le totem du Datadog Summit', 9)
 ) as p(url, alt, caption, position)
 where a.slug = 'compte-rendu-datadog-summit-paris-2026';
 

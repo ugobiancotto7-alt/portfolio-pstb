@@ -12,7 +12,8 @@ export function Avatar({ member, size = 48 }: { member: MemberSummary; size?: nu
         width={size}
         height={size}
         className="rounded-full object-cover"
-        style={{ width: size, height: size }}
+        // Les photos sont des portraits en pied : on cadre sur le visage
+        style={{ width: size, height: size, objectPosition: "50% 20%" }}
       />
     );
   }

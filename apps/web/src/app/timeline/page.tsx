@@ -5,6 +5,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { TimelineEntry, TimelineKind } from "@pstb/shared";
+import { Container } from "@/components/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { api } from "@/lib/api";
 import { formatDate, formatMonth } from "@/lib/format";
@@ -36,36 +37,40 @@ export default async function TimelinePage() {
   }
 
   return (
-    <>
-      <PageHeader title="Timeline">Notre progression, mois par mois.</PageHeader>
-      {entries.length === 0 && <p className="text-muted">Rien pour l&apos;instant.</p>}
+    <Container>
+      <PageHeader n="02" label="Timeline" title="Timeline">
+        Notre progression, mois par mois.
+      </PageHeader>
+      {entries.length === 0 && <p className="mt-10 text-muted">Rien pour l&apos;instant.</p>}
 
-      <ol className="relative space-y-12 border-l border-border pl-6 sm:pl-8">
+      <ol className="mt-4">
         {[...byMonth.entries()].map(([month, items]) => (
-          <li key={month}>
-            <span className="absolute -left-[7px] mt-1.5 size-3.5 rounded-full border-2 border-bg bg-brand-500" aria-hidden />
-            <h2 className="text-lg font-bold">{formatMonth(month)}</h2>
-            <ul className="mt-4 space-y-3">
-              {items.map((entry) => {
+          // Une ligne par mois : le mois à gauche, les entrées à droite
+          <li key={month} className="grid gap-6 border-b border-border py-12 md:grid-cols-[260px_1fr]">
+            <h2 className="font-display text-4xl leading-none md:sticky md:top-28 md:self-start">{formatMonth(month)}</h2>
+            <ul className="divide-y divide-border">
+              {items.map((entry, i) => {
                 const href = hrefFor(entry);
                 const body = (
-                  <>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">
-                      {KIND_LABELS[entry.kind]} · {formatDate(entry.date)}
-                    </p>
-                    <p className="mt-1 font-semibold">{entry.title}</p>
-                    {entry.summary && <p className="mt-1 text-sm text-muted">{entry.summary}</p>}
-                  </>
+                  <div className="grid grid-cols-[2.5rem_1fr] gap-4 py-5 first:pt-0">
+                    <span className="font-display text-2xl italic text-muted">{String(i + 1).padStart(2, "0")}</span>
+                    <div>
+                      <p className="eyebrow">
+                        {KIND_LABELS[entry.kind]} · {formatDate(entry.date)}
+                      </p>
+                      <p className="mt-2 text-xl font-semibold">{entry.title}</p>
+                      {entry.summary && <p className="mt-1 text-sm leading-6 text-muted">{entry.summary}</p>}
+                    </div>
+                  </div>
                 );
-                const cls = "block rounded-xl border border-border bg-surface p-4";
                 return (
                   <li key={`${entry.kind}-${entry.id}`}>
                     {href ? (
-                      <Link href={href} className={`${cls} transition hover:border-brand-500/50`}>
+                      <Link href={href} className="block transition hover:opacity-70">
                         {body}
                       </Link>
                     ) : (
-                      <div className={cls}>{body}</div>
+                      body
                     )}
                   </li>
                 );
@@ -74,6 +79,6 @@ export default async function TimelinePage() {
           </li>
         ))}
       </ol>
-    </>
+    </Container>
   );
 }

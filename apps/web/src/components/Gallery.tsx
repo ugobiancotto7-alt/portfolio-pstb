@@ -10,33 +10,27 @@ import type { Photo } from "@pstb/shared";
 export function Gallery({ photos }: { photos: Photo[] }) {
   if (photos.length === 0) return null;
   return (
-    <section aria-labelledby="galerie" className="mt-12">
-      <h2 id="galerie" className="mb-4 text-2xl font-bold tracking-tight">
-        Galerie
-      </h2>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {photos.map((photo) => (
-          <li key={photo.id} className="relative aspect-[3/4] overflow-hidden rounded-xl">
-            {photo.url ? (
-              <figure className="h-full">
-                <Image
-                  src={photo.url}
-                  alt={photo.alt}
-                  fill
-                  sizes="(min-width: 640px) 33vw, 50vw"
-                  className="object-cover transition hover:scale-105"
-                />
-                {photo.caption && (
-                  <figcaption className="absolute inset-x-0 bottom-0 bg-black/50 p-2 text-xs text-white">
-                    {photo.caption}
-                  </figcaption>
-                )}
-              </figure>
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-muted">
-                <ImageIcon className="size-6" aria-hidden />
-                <span className="text-xs">Photo à venir</span>
-              </div>
+    <section aria-labelledby="galerie" id="galerie" className="mt-20 scroll-mt-28">
+      <p className="eyebrow">Galerie</p>
+      <h2 className="mt-3 mb-8 font-display text-4xl sm:text-5xl">La journée en images</h2>
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4">
+        {photos.map((photo, i) => (
+          <li key={photo.id}>
+            <div className="relative aspect-[3/4] overflow-hidden bg-sunken">
+              {photo.url ? (
+                <Image src={photo.url} alt={photo.alt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-2 border border-dashed border-border text-muted">
+                  <ImageIcon className="size-6" aria-hidden />
+                  <span className="text-xs">Photo à venir</span>
+                </div>
+              )}
+            </div>
+            {photo.caption && (
+              <p className="mt-3 text-sm leading-5 text-muted">
+                <span className="mr-2 font-display italic text-fg">{String(i + 1).padStart(2, "0")}</span>
+                {photo.caption}
+              </p>
             )}
           </li>
         ))}

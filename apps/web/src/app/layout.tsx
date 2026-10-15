@@ -4,6 +4,9 @@
  *   app/page.tsx              -> /
  *   app/equipe/page.tsx       -> /equipe
  *   app/articles/[slug]/…     -> /articles/n-importe-quel-slug
+ *
+ * Chaque page gère sa propre largeur avec <Container>, ce qui permet à
+ * l'accueil d'avoir une grande photo sur toute la largeur de l'écran.
  */
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -21,10 +24,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // suppressHydrationWarning : next-themes ajoute la classe "dark" avant React, c'est voulu.
     <html lang="fr" suppressHydrationWarning>
-      <body className="min-h-screen antialiased">
+      <head>
+        {/* Polices : Instrument Serif pour les titres, Manrope pour le texte */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap"
+        />
+      </head>
+      <body className="min-h-screen font-sans antialiased">
         <ThemeProvider>
           <Header />
-          <main className="mx-auto max-w-5xl px-4 pt-10 sm:pt-16">{children}</main>
+          <main>{children}</main>
           <Footer />
         </ThemeProvider>
       </body>

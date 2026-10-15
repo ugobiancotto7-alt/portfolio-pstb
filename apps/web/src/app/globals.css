@@ -1,5 +1,10 @@
 /*
  * Tailwind CSS v4 : la configuration se fait directement dans le CSS.
+ *
+ * Direction artistique : un style "éditorial" inspiré des beaux sites
+ * d'architecture d'intérieur. Fond blanc cassé chaud, titres en serif,
+ * beaucoup d'espace, grandes photos et numérotation 01, 02, 03…
+ * La couleur indigo du logo PSTB sert d'accent, avec parcimonie.
  */
 @import "tailwindcss";
 
@@ -7,42 +12,58 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
- * Nos couleurs, inspirées du logo PSTB (indigo -> violet).
- * Chaque variable devient une classe Tailwind : bg-surface, text-muted, etc.
+ * Chaque variable --color-xxx devient une classe Tailwind :
+ * bg-surface, text-muted, border-border, text-brand-600…
+ * Les valeurs changent selon le thème (voir :root et .dark plus bas).
  */
 @theme {
-  --color-brand-50: #eef0ff;
-  --color-brand-100: #e0e3ff;
-  --color-brand-400: #8b8ff8;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #5145cd;
-  --color-brand-700: #4338ca;
-  --color-accent-500: #a855f7;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+
+  --color-brand-400: var(--accent-soft);
+  --color-brand-500: var(--accent);
+  --color-brand-600: var(--accent);
+  --color-brand-700: var(--accent-strong);
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
   --color-border: var(--border);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
 }
 
-/* Valeurs en mode clair… */
+/* Mode clair : papier chaud */
 :root {
-  --bg: #fafafa;
-  --surface: #ffffff;
-  --border: #e4e4e7;
-  --fg: #18181b;
-  --muted: #52525b;
+  --bg: #efebe6;
+  --surface: #f8f5f1;
+  --sunken: #e6e0d8;
+  --border: #d8d0c5;
+  --fg: #1d1a17;
+  --muted: #6b6259;
+  --ink: #1d1a17; /* boutons pleins */
+  --on-ink: #f8f5f1;
+  --accent: #3f3d9e; /* indigo du logo PSTB */
+  --accent-strong: #2f2d80;
+  --accent-soft: #3f3d9e;
   color-scheme: light;
 }
 
-/* …et en mode sombre. Les composants n'ont rien à changer. */
+/* Mode sombre : brun très profond plutôt que noir pur */
 .dark {
-  --bg: #0b0b12;
-  --surface: #15151f;
-  --border: #2a2a38;
-  --fg: #f4f4f5;
-  --muted: #a1a1aa;
+  --bg: #151311;
+  --surface: #1e1b18;
+  --sunken: #11100e;
+  --border: #36312b;
+  --fg: #efebe6;
+  --muted: #a69c90;
+  --ink: #efebe6;
+  --on-ink: #151311;
+  --accent: #a9a7f2;
+  --accent-strong: #c4c2f7;
+  --accent-soft: #a9a7f2;
   color-scheme: dark;
 }
 
@@ -51,15 +72,29 @@ body {
   color: var(--fg);
 }
 
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+/* Petit label numéroté au-dessus des titres : "01 — L'équipe" */
+.eyebrow {
+  @apply text-xs font-semibold uppercase tracking-[0.18em] text-muted;
+}
+
 /* Styles du contenu Markdown des articles */
+.prose-article {
+  @apply text-[17px];
+}
 .prose-article h2 {
-  @apply mt-10 mb-3 text-2xl font-bold tracking-tight;
+  @apply mt-14 mb-4 font-display text-4xl leading-tight;
 }
 .prose-article h3 {
-  @apply mt-6 mb-2 text-lg font-semibold;
+  @apply mt-8 mb-2 text-lg font-semibold;
 }
 .prose-article p {
-  @apply my-4 leading-7;
+  @apply my-4 leading-8;
 }
 .prose-article ul {
   @apply my-4 list-disc space-y-2 pl-6;
@@ -68,11 +103,17 @@ body {
   @apply my-4 list-decimal space-y-2 pl-6;
 }
 .prose-article a {
-  @apply text-brand-600 underline underline-offset-2 dark:text-brand-400;
+  @apply text-brand-600 underline underline-offset-2;
 }
 .prose-article strong {
   @apply font-semibold text-fg;
 }
 .prose-article li {
-  @apply leading-7;
+  @apply leading-8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
 }

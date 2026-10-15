@@ -47,7 +47,14 @@ async function getOrNull<T>(path: string): Promise<T | null> {
   }
 }
 
+/** Chiffres du tableau de bord (route /stats). */
+export interface Stats {
+  totals: { articles: number; projects: number; events: number; skills: number; hours: number };
+  articlesPerMonth: { month: string; count: number }[];
+}
+
 export const api = {
+  stats: () => get<Stats>("/stats"),
   members: () => get<Member[]>("/members"),
   member: (slug: string) => getOrNull<Member>(`/members/${encodeURIComponent(slug)}`),
   articles: (params: { page?: number; type?: ArticleType } = {}) => {

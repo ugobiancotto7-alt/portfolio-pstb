@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Container } from "@/components/Container";
 import { PageHeader } from "@/components/PageHeader";
 import { api } from "@/lib/api";
 
@@ -7,21 +8,25 @@ export const metadata: Metadata = { title: "Projets" };
 export default async function ProjectsPage() {
   const projects = await api.projects();
   return (
-    <>
-      <PageHeader title="Projets">Nos projets Data &amp; IA : contexte, technologies et résultats.</PageHeader>
+    <Container>
+      <PageHeader n="04" label="Projets" title="Projets">
+        Nos projets Data &amp; IA : contexte, technologies et résultats.
+      </PageHeader>
       {projects.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-border p-10 text-center text-muted">
-          Les premiers projets arrivent bientôt.
+        <div className="mt-14 border border-dashed border-border px-6 py-16 text-center">
+          <p className="font-display text-3xl">Les premiers projets arrivent bientôt.</p>
+          <p className="mt-3 text-sm text-muted">Ils seront ajoutés depuis l&apos;espace admin au fil de l&apos;année.</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {projects.map((p) => (
-            <article key={p.id} className="rounded-2xl border border-border bg-surface p-6">
-              <h2 className="text-lg font-bold">{p.title}</h2>
-              <p className="mt-2 text-sm text-muted">{p.summary}</p>
+        <div className="mt-14 grid gap-x-6 gap-y-12 sm:grid-cols-2">
+          {projects.map((p, i) => (
+            <article key={p.id} className="border-t border-border pt-6">
+              <p className="eyebrow">{String(i + 1).padStart(2, "0")}</p>
+              <h2 className="mt-2 font-display text-4xl">{p.title}</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">{p.summary}</p>
               <ul className="mt-4 flex flex-wrap gap-1.5">
                 {p.technologies.map((t) => (
-                  <li key={t.id} className="rounded-full bg-brand-500/10 px-2.5 py-1 text-xs font-medium">
+                  <li key={t.id} className="rounded-full border border-border px-3 py-1 text-xs">
                     {t.name}
                   </li>
                 ))}
@@ -30,6 +35,6 @@ export default async function ProjectsPage() {
           ))}
         </div>
       )}
-    </>
+    </Container>
   );
 }

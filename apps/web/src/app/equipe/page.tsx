@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { SKILL_CATEGORIES } from "@pstb/shared";
 import { Avatar } from "@/components/Avatar";
+import { Container } from "@/components/Container";
 import { ExternalLinks } from "@/components/ExternalLinks";
 import { PageHeader } from "@/components/PageHeader";
 import { api } from "@/lib/api";
@@ -10,17 +12,31 @@ export const metadata: Metadata = { title: "Équipe" };
 export default async function TeamPage() {
   const members = await api.members();
   return (
-    <>
-      <PageHeader title="L'équipe">Trois étudiants, trois profils, un même objectif : progresser ensemble.</PageHeader>
-      <div className="grid gap-6 md:grid-cols-3">
-        {members.map((member) => (
-          <article key={member.id} id={member.slug} className="flex flex-col rounded-2xl border border-border bg-surface p-6">
-            <Avatar member={member} size={72} />
-            <h2 className="mt-4 text-xl font-bold">
-              {member.firstName} {member.lastName}
-            </h2>
-            {member.role && <p className="text-sm font-medium text-brand-600 dark:text-brand-400">{member.role}</p>}
-            {member.bio && <p className="mt-3 text-sm text-muted">{member.bio}</p>}
+    <Container>
+      <PageHeader n="01" label="L'équipe" title="L'équipe">
+        Trois étudiants, trois profils, un même objectif : progresser ensemble.
+      </PageHeader>
+
+      <div className="mt-14 grid gap-x-6 gap-y-14 md:grid-cols-3">
+        {members.map((member, i) => (
+          <article key={member.id} id={member.slug} className="flex scroll-mt-28 flex-col">
+            <div className="relative aspect-[4/5] overflow-hidden bg-sunken">
+              {member.avatarUrl ? (
+                <Image src={member.avatarUrl} alt={member.firstName} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <Avatar member={member} size={96} />
+                </div>
+              )}
+            </div>
+            <div className="mt-5 flex items-baseline justify-between border-b border-border pb-4">
+              <h2 className="font-display text-4xl">
+                {member.firstName} {member.lastName}
+              </h2>
+              <span className="text-xs text-muted">{String(i + 1).padStart(2, "0")}</span>
+            </div>
+            {member.role && <p className="mt-3 text-sm font-semibold">{member.role}</p>}
+            {member.bio && <p className="mt-2 text-sm leading-6 text-muted">{member.bio}</p>}
 
             {member.skills.length > 0 && (
               <ul className="mt-4 flex flex-wrap gap-1.5">
@@ -28,7 +44,7 @@ export default async function TeamPage() {
                 {[...member.skills]
                   .sort((a, b) => SKILL_CATEGORIES.indexOf(a.category) - SKILL_CATEGORIES.indexOf(b.category))
                   .map((skill) => (
-                    <li key={skill.id} className="rounded-full bg-brand-500/10 px-2.5 py-1 text-xs font-medium" title={`Niveau ${skill.level}/5`}>
+                    <li key={skill.id} className="rounded-full border border-border px-3 py-1 text-xs" title={`Niveau ${skill.level}/5`}>
                       {skill.name}
                     </li>
                   ))}
@@ -41,6 +57,6 @@ export default async function TeamPage() {
           </article>
         ))}
       </div>
-    </>
+    </Container>
   );
 }
