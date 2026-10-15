@@ -104,8 +104,7 @@ h3 {
 /* Grille de fond façon "tableau de bord" */
 .bg-grid {
   background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 56px 56px;
 }
 
@@ -118,7 +117,9 @@ h3 {
 
 /* Halo lumineux derrière un élément */
 .glow {
-  box-shadow: 0 0 0 1px var(--border), 0 20px 60px -20px var(--glow);
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 20px 60px -20px var(--glow);
 }
 
 /* Carte qui s'incline en 3D sous la souris (voir lib/enhance.ts) */
@@ -127,6 +128,28 @@ h3 {
   transition: transform 0.25s ease-out;
   transform-style: preserve-3d;
   will-change: transform;
+}
+
+/* Carte du tableau de bord : halo qui suit la souris (--mx/--my posés par lib/enhance.ts) */
+.metric-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in oklab, var(--accent) 22%, transparent),
+    transparent 70%
+  );
+}
+.metric-card:hover::before {
+  opacity: 1;
+}
+.metric-card > * {
+  position: relative;
 }
 
 /* Point lumineux qui circule le long du pipeline */

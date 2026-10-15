@@ -70,8 +70,17 @@ articlesRouter.post("/", requireAdmin, async (req, res) => {
       `insert into articles (slug, title, excerpt, content, cover_url, type, status, published_at, event_id, project_id)
        values ($1, $2, $3, $4, $5, $6, $7, case when $7 = 'published' then now() end, $8, $9)
        returning id`,
-      [input.slug, input.title, input.excerpt, input.content, input.coverUrl ?? null,
-       input.type, input.status, input.eventId ?? null, input.projectId ?? null],
+      [
+        input.slug,
+        input.title,
+        input.excerpt,
+        input.content,
+        input.coverUrl ?? null,
+        input.type,
+        input.status,
+        input.eventId ?? null,
+        input.projectId ?? null,
+      ],
     );
     await setAuthors(client, rows[0].id, input);
     return rows[0].id;
@@ -89,8 +98,18 @@ articlesRouter.put("/:id", requireAdmin, async (req, res) => {
          published_at = case when $8 = 'published' then coalesce(published_at, now()) else published_at end,
          event_id = $9, project_id = $10
        where id = $1`,
-      [req.params.id, input.slug, input.title, input.excerpt, input.content, input.coverUrl ?? null,
-       input.type, input.status, input.eventId ?? null, input.projectId ?? null],
+      [
+        req.params.id,
+        input.slug,
+        input.title,
+        input.excerpt,
+        input.content,
+        input.coverUrl ?? null,
+        input.type,
+        input.status,
+        input.eventId ?? null,
+        input.projectId ?? null,
+      ],
     );
     if (rowCount === 0) throw notFound("Article");
     await setAuthors(client, req.params.id as string, input);
@@ -107,8 +126,8 @@ articlesRouter.delete("/:id", requireAdmin, async (req, res) => {
 /** Remplace la liste des auteurs d'un article. */
 async function setAuthors(client: PoolClient, articleId: string, input: ArticleInput) {
   await client.query(`delete from article_authors where article_id = $1`, [articleId]);
-  await client.query(
-    `insert into article_authors (article_id, member_id) select $1, unnest($2::uuid[])`,
-    [articleId, input.authorIds],
-  );
+  await client.query(`insert into article_authors (article_id, member_id) select $1, unnest($2::uuid[])`, [
+    articleId,
+    input.authorIds,
+  ]);
 }

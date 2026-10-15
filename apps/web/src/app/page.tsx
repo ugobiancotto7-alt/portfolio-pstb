@@ -1,7 +1,7 @@
 /**
  * Page d'accueil, style "IA / business" :
  *   1. hero : texte à gauche, sphère neuronale 3D interactive à droite
- *   2. barre de métriques façon tableau de bord
+ *   2. tableau de bord : 4 cartes cliquables avec chiffres animés
  *   3. notre méthode présentée comme un pipeline de données (cartes qui zooment)
  *   4. l'équipe (cartes qui s'inclinent en 3D sous la souris)
  *   5. le dernier compte rendu
@@ -13,7 +13,20 @@
  */
 import Image from "next/image";
 import Link from "next/link";
-import { Activity, ArrowRight, ArrowUpRight, BrainCircuit, Database, Rocket, Sparkles } from "lucide-react";
+import {
+  Activity,
+  ArrowRight,
+  ArrowUpRight,
+  BrainCircuit,
+  CalendarDays,
+  Camera,
+  Database,
+  FileText,
+  Rocket,
+  Sparkles,
+  Users,
+} from "lucide-react";
+import { Avatar } from "@/components/Avatar";
 import { Container } from "@/components/Container";
 import { SectionHeading } from "@/components/SectionHeading";
 import { api } from "@/lib/api";
@@ -37,11 +50,82 @@ export default async function HomePage() {
   const photos = latestFull?.photos.filter((p) => p.url) ?? [];
   const moments = photos.slice(2, 5); // 3 photos différentes de la couverture
 
+  const event = latestFull?.event ?? null;
+  const articleHref = latest ? `/articles/${latest.slug}` : "/articles";
+
+  // Les 4 cartes du tableau de bord. "visual" est le petit aperçu affiché sous le chiffre.
   const metrics = [
-    { label: "Étudiants", value: pad(members.length) },
-    { label: "Événements", value: pad(stats.totals.events) },
-    { label: "Articles", value: pad(stats.totals.articles) },
-    { label: "Photos", value: pad(photos.length) },
+    {
+      icon: Users,
+      label: "Étudiants",
+      value: members.length,
+      href: "/equipe",
+      detail: members.map((m) => m.firstName).join(", "),
+      visual: (
+        <div className="flex -space-x-2">
+          {members.map((m) => (
+            <span
+              key={m.id}
+              className="rounded-full ring-2 ring-surface transition duration-300 group-hover:-translate-y-1"
+            >
+              <Avatar member={m} size={36} />
+            </span>
+          ))}
+        </div>
+      ),
+    },
+    {
+      icon: CalendarDays,
+      label: "Événements",
+      value: stats.totals.events,
+      href: "/timeline",
+      detail: event ? `${event.title} · ${formatDate(event.startsOn)}` : "Bientôt",
+      visual: (
+        <div className="flex items-center gap-1" aria-hidden>
+          {/* Une mini-frise de l'année : un trait par mois, le mois de l'événement allumé */}
+          {Array.from({ length: 10 }, (_, k) => (
+            <span
+              key={k}
+              className={`h-6 flex-1 rounded-sm ${k === 1 ? "bg-cyan shadow-[0_0_10px_var(--accent-2)]" : "bg-border"}`}
+            />
+          ))}
+        </div>
+      ),
+    },
+    {
+      icon: FileText,
+      label: "Articles",
+      value: stats.totals.articles,
+      href: articleHref,
+      detail: latest ? `Dernier : ${latest.title}` : "Bientôt",
+      visual: (
+        <div className="space-y-1.5" aria-hidden>
+          <span className="block h-1.5 w-full rounded-full bg-border" />
+          <span className="block h-1.5 w-4/5 rounded-full bg-border" />
+          <span className="block h-1.5 w-3/5 rounded-full bg-brand-500/60 transition-all duration-500 group-hover:w-full" />
+        </div>
+      ),
+    },
+    {
+      icon: Camera,
+      label: "Photos",
+      value: photos.length,
+      href: `${articleHref}#galerie`,
+      detail: event ? `Galerie ${event.title}` : "Galerie",
+      visual: (
+        <div className="flex gap-1.5">
+          {photos.slice(0, 3).map((p, k) => (
+            <span
+              key={p.id}
+              className="relative aspect-square flex-1 overflow-hidden rounded-md border border-border transition duration-300 group-hover:-translate-y-1"
+              style={{ transitionDelay: `${k * 60}ms` }}
+            >
+              <Image src={p.url!} alt="" fill sizes="60px" className="object-cover" />
+            </span>
+          ))}
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -108,16 +192,36 @@ export default async function HomePage() {
           </div>
         </Container>
 
-        {/* 2. Barre de métriques */}
-        <Container className="relative pb-10">
-          <dl className="glass grid grid-cols-2 divide-border rounded-2xl sm:grid-cols-4 sm:divide-x">
-            {metrics.map((m) => (
-              <div key={m.label} className="px-6 py-5">
-                <dt className="eyebrow">{m.label}</dt>
-                <dd className="mt-2 font-display text-4xl tabular-nums">{m.value}</dd>
-              </div>
+        {/* 2. Tableau de bord : 4 cartes cliquables, chiffres animés, halo qui suit la souris */}
+        <Container className="relative pb-12">
+          <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {metrics.map(({ icon: Icon, label, value, href, detail, visual }, i) => (
+              <li key={label}>
+                <Link
+                  href={href}
+                  data-spotlight
+                  data-tilt="8"
+                  className="metric-card group glass relative flex h-full flex-col overflow-hidden rounded-2xl p-4 transition duration-300 hover:-translate-y-1 hover:border-brand-500 sm:p-5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex size-9 items-center justify-center rounded-xl border border-border bg-sunken text-brand-500 transition group-hover:border-brand-500 group-hover:text-cyan">
+                      <Icon className="size-4" />
+                    </span>
+                    <span className="font-mono text-[10px] text-muted">0{i + 1}</span>
+                  </div>
+                  <p className="mt-4 font-display text-5xl tabular-nums leading-none sm:text-6xl">
+                    <span data-count={value}>{pad(value)}</span>
+                  </p>
+                  <p className="eyebrow mt-2">{label}</p>
+                  <div className="mt-4 flex-1">{visual}</div>
+                  <p className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3 text-xs text-muted">
+                    <span className="line-clamp-1">{detail}</span>
+                    <ArrowUpRight className="size-3.5 shrink-0 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-cyan" />
+                  </p>
+                </Link>
+              </li>
             ))}
-          </dl>
+          </ul>
         </Container>
       </section>
 

@@ -22,6 +22,8 @@ export function enhance(root: ParentNode = document) {
   root.querySelectorAll<HTMLElement>("[data-tilt]").forEach(mountTilt);
   root.querySelectorAll<HTMLElement>("[data-nav]").forEach(mountNavIndicator);
   root.querySelectorAll<HTMLElement>("[data-menu]").forEach(mountMenu);
+  root.querySelectorAll<HTMLElement>("[data-spotlight]").forEach(mountSpotlight);
+  root.querySelectorAll<HTMLElement>("[data-count]").forEach(mountCountUp);
 }
 
 // Évite de brancher deux fois le même élément
@@ -72,11 +74,28 @@ function mountNeuralSphere(canvas: HTMLCanvasElement) {
     t: Math.random(),
   }));
 
-  let rotX = 0.35,
-    rotY = 0,
-    targetX = 0.35,
-    targetY = 0,
-    autoSpin = 0.0022;
+  /*
+   * Paris sur la sphère, vue comme un globe : latitude 48,86° N,
+   * longitude 2,35° E. Conversion en coordonnées 3D (rayon 1) :
+   *   x = cos(lat) × cos(lon),  y = -sin(lat) (le haut de l'écran = le nord),
+   *   z = cos(lat) × sin(lon)
+   */
+  const lat = (48.8566 * Math.PI) / 180,
+    lon = (2.3522 * Math.PI) / 180;
+  const paris: [number, number, number] = [
+    Math.cos(lat) * Math.cos(lon),
+    -Math.sin(lat),
+    Math.cos(lat) * Math.sin(lon),
+  ];
+
+  // Rotation de départ choisie pour que Paris soit face à nous
+  const BASE_X = 0.62,
+    BASE_Y = -Math.PI / 2 + 0.05;
+  let rotX = BASE_X,
+    rotY = BASE_Y,
+    targetX = BASE_X,
+    pointerY = 0,
+    time = 0;
   let width = 0,
     height = 0,
     dpr = 1;
@@ -95,11 +114,14 @@ function mountNeuralSphere(canvas: HTMLCanvasElement) {
     const rect = canvas.getBoundingClientRect();
     const nx = (clientX - rect.left) / rect.width - 0.5;
     const ny = (clientY - rect.top) / rect.height - 0.5;
-    targetY = nx * 2.2;
-    targetX = 0.35 + ny * 1.4;
+    pointerY = nx * 1.8;
+    targetX = BASE_X + ny * 1.2;
   };
   canvas.addEventListener("pointermove", (e) => onPointer(e.clientX, e.clientY));
-  canvas.addEventListener("pointerleave", () => (targetX = 0.35));
+  canvas.addEventListener("pointerleave", () => {
+    targetX = BASE_X;
+    pointerY = 0;
+  });
 
   const color = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#8b8bff";
 
@@ -107,7 +129,9 @@ function mountNeuralSphere(canvas: HTMLCanvasElement) {
   const draw = () => {
     if (!canvas.isConnected) return; // la page a changé : on arrête
     frame++;
-    targetY += reducedMotion() ? 0 : autoSpin;
+    // La sphère oscille doucement autour de Paris pour qu'il reste visible
+    if (!reducedMotion()) time += 0.008;
+    const targetY = BASE_Y + Math.sin(time) * 0.75 + pointerY;
     rotX += (targetX - rotX) * 0.05;
     rotY += (targetY - rotY) * 0.05;
 
@@ -120,15 +144,16 @@ function mountNeuralSphere(canvas: HTMLCanvasElement) {
     const accent = color("--accent"),
       accent2 = color("--accent-2");
 
-    // Rotation + projection de chaque point
-    const proj = points.map(([x, y, z]) => {
+    // Rotation (autour de Y puis de X) + projection en perspective d'un point
+    const project = ([x, y, z]: [number, number, number]) => {
       const x1 = x * cosY - z * sinY;
       const z1 = x * sinY + z * cosY;
       const y2 = y * cosX - z1 * sinX;
       const z2 = y * sinX + z1 * cosX;
       const s = f / (f + z2);
       return { x: width / 2 + x1 * R * s, y: height / 2 + y2 * R * s, z: z2, s };
-    });
+    };
+    const proj = points.map(project);
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, height);
@@ -174,6 +199,49 @@ function mountNeuralSphere(canvas: HTMLCanvasElement) {
       ctx.fill();
     });
     ctx.globalAlpha = 1;
+
+    // Le marqueur "Nous sommes ici" sur Paris
+    const fg = color("--fg");
+    const pin = project(paris);
+    const visible = Math.max(0, Math.min(1, (-pin.z + 0.15) * 3)); // s'efface quand Paris passe derrière
+    if (visible > 0) {
+      const pulse = (frame % 90) / 90; // anneau qui grandit puis disparaît, en boucle
+      ctx.globalAlpha = visible * (1 - pulse);
+      ctx.strokeStyle = accent2;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(pin.x, pin.y, 5 + pulse * 18, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.globalAlpha = visible;
+      ctx.fillStyle = accent2;
+      ctx.beginPath();
+      ctx.arc(pin.x, pin.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Trait + étiquette vers le haut, du côté où il reste de la place
+      // (à gauche si Paris est dans la moitié droite, sinon le texte sortirait du cadre)
+      const dir = pin.x > canvas.clientWidth / 2 ? -1 : 1;
+      const lx = pin.x + 34 * dir,
+        ly = pin.y - 34;
+      ctx.strokeStyle = accent2;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pin.x + 4 * dir, pin.y - 4);
+      ctx.lineTo(lx, ly);
+      ctx.lineTo(lx + 12 * dir, ly);
+      ctx.stroke();
+      ctx.textBaseline = "middle";
+      ctx.textAlign = dir > 0 ? "left" : "right";
+      ctx.font = '600 14px "Geist", system-ui, sans-serif';
+      ctx.fillStyle = fg;
+      ctx.fillText("Nous sommes ici", lx + 18 * dir, ly - 8);
+      ctx.font = '500 11px "Geist Mono", ui-monospace, monospace';
+      ctx.fillStyle = accent2;
+      ctx.fillText("PARIS · 48.86°N 2.35°E", lx + 18 * dir, ly + 9);
+      ctx.textAlign = "left";
+      ctx.globalAlpha = 1;
+    }
 
     if (!reducedMotion() || frame < 2) requestAnimationFrame(draw);
   };
@@ -265,4 +333,55 @@ function mountMenu(menu: HTMLElement) {
     item.addEventListener("pointerenter", show);
     item.addEventListener("focusin", show);
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* Halo qui suit la souris sur une carte                               */
+/* ------------------------------------------------------------------ */
+/*
+ * On donne au CSS la position de la souris dans la carte (--mx, --my).
+ * Un dégradé radial centré sur ce point crée la "lampe torche"
+ * (voir .metric-card dans globals.css).
+ */
+function mountSpotlight(el: HTMLElement) {
+  if (!once(el, "spot")) return;
+  el.addEventListener("pointermove", (e) => {
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Compteur animé : 00 -> valeur quand le chiffre apparaît à l'écran   */
+/* ------------------------------------------------------------------ */
+/*
+ * Le vrai chiffre est déjà dans le HTML (utile sans JavaScript et pour
+ * Google). IntersectionObserver prévient quand l'élément devient visible,
+ * puis requestAnimationFrame fait défiler les nombres en ~1,2 s avec un
+ * ralenti en fin de course (easeOutCubic).
+ */
+function mountCountUp(el: HTMLElement) {
+  if (!once(el, "counted")) return;
+  const target = Number(el.dataset.count) || 0;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+  const fmt = (n: number) => String(n).padStart(2, "0");
+  const run = () => {
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - t0) / 1200);
+      el.textContent = fmt(Math.round(target * (1 - (1 - t) ** 3)));
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  const io = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) {
+      io.disconnect();
+      run();
+    }
+  });
+  io.observe(el);
+  // On rejoue l'animation au survol de la carte, pour le plaisir
+  el.closest("a, li")?.addEventListener("pointerenter", run);
 }
