@@ -17,6 +17,7 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, FileText, Flag, FlaskConical, type LucideIcon } from "lucide-react";
 import type { TimelineEntry, TimelineKind } from "@pstb/shared";
 import { Container } from "@/components/Container";
+import { Halo } from "@/components/Halo";
 import { PageHeader } from "@/components/PageHeader";
 import { Starfield } from "@/components/Starfield";
 import { api } from "@/lib/api";
@@ -259,7 +260,8 @@ export default async function TimelinePage() {
                       >
                         {formatDate(entry.date)}
                       </p>
-                      <div className={`tl-swing ${side === 1 ? "" : "md:order-1"}`}>
+                      <div className={`tl-swing ${entry.coverUrl ? "halo" : ""} ${side === 1 ? "" : "md:order-1"}`}>
+                        {entry.coverUrl && <Halo src={entry.coverUrl} />}
                         {link ? (
                           <Link href={link.href} data-tilt="5" data-spotlight className={cardClass}>
                             {card}

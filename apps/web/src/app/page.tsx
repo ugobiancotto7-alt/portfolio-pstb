@@ -28,14 +28,14 @@ import {
   Users,
 } from "lucide-react";
 import type { CSSProperties } from "react";
-import { Avatar } from "@/components/Avatar";
 import { Container } from "@/components/Container";
+import { Halo } from "@/components/Halo";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Starfield } from "@/components/Starfield";
 import { YearGauge } from "@/components/YearGauge";
 import { api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
-import { ofMonth, schoolYear } from "@/lib/year";
+import { schoolYear } from "@/lib/year";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 /** Décalage d'animation en cascade, lu par le CSS de data-reveal */
@@ -76,14 +76,17 @@ export default async function HomePage() {
       value: members.length,
       href: "/equipe",
       detail: members.map((m) => m.firstName).join(", "),
+      // Les initiales plutôt que les visages : les photos sont déjà dans la section Équipe,
+      // on évite d'afficher deux fois la même image sur la page.
       visual: (
-        <div className="flex -space-x-2">
-          {members.map((m) => (
+        <div className="flex -space-x-2" aria-hidden>
+          {members.map((m, k) => (
             <span
               key={m.id}
-              className="rounded-full ring-2 ring-surface transition duration-300 group-hover:-translate-y-1"
+              className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-cyan font-mono text-xs font-semibold text-white ring-2 ring-surface transition duration-300 group-hover:-translate-y-1"
+              style={{ transitionDelay: `${k * 60}ms` }}
             >
-              <Avatar member={m} size={36} />
+              {m.firstName[0]}
             </span>
           ))}
         </div>
@@ -134,16 +137,15 @@ export default async function HomePage() {
       value: photos.length,
       href: `${articleHref}#galerie`,
       detail: event ? `Galerie ${event.title}` : "Galerie",
+      // Une planche contact : un petit cadre par photo (les photos elles-mêmes sont plus bas)
       visual: (
-        <div className="flex gap-1.5">
-          {photos.slice(0, 3).map((p, k) => (
+        <div className="flex items-end gap-1" aria-hidden>
+          {photos.map((p, k) => (
             <span
               key={p.id}
-              className="relative aspect-square flex-1 overflow-hidden rounded-md border border-border transition duration-300 group-hover:-translate-y-1"
-              style={{ transitionDelay: `${k * 60}ms` }}
-            >
-              <Image src={p.url!} alt="" fill sizes="60px" className="object-cover" />
-            </span>
+              className="aspect-[3/4] flex-1 rounded-[3px] border border-border bg-gradient-to-b from-brand-500/35 to-cyan/15 transition duration-500 group-hover:-translate-y-1.5 group-hover:from-brand-500/70 group-hover:to-cyan/50"
+              style={{ transitionDelay: `${k * 35}ms` }}
+            />
           ))}
         </div>
       ),
@@ -211,13 +213,6 @@ export default async function HomePage() {
               className="absolute -left-[15%] -top-[15%] h-[130%] w-[130%] cursor-grab touch-pan-y"
               aria-label="Planète formée d'un réseau de neurones en 3D, avec un point sur Paris : nous sommes ici"
             />
-            <span className="glass absolute left-2 top-8 hidden rounded-lg px-3 py-2 font-mono text-[11px] text-muted sm:block">
-              <span className="text-cyan">●</span> model.status = <span className="text-fg">&quot;learning&quot;</span>
-            </span>
-            <span className="glass absolute bottom-10 right-2 rounded-lg px-3 py-2 font-mono text-[11px] text-muted">
-              epoch <span className="text-fg">{pad(year.currentIndex + 1)}/12</span> · mois{" "}
-              {ofMonth(year.months[year.currentIndex].name)}
-            </span>
           </div>
         </Container>
 
@@ -295,7 +290,8 @@ export default async function HomePage() {
         </SectionHeading>
         <div className="grid gap-6 sm:grid-cols-3">
           {members.map((m, i) => (
-            <div key={m.id} data-reveal style={delay(i)}>
+            <div key={m.id} data-reveal style={delay(i)} className="halo">
+              {m.avatarUrl && <Halo src={m.avatarUrl} />}
               <Link
                 href={`/equipe#${m.slug}`}
                 data-tilt="10"
@@ -336,31 +332,33 @@ export default async function HomePage() {
       {latest && (
         <Container className="mt-28">
           <SectionHeading n="03" label="Dernier article" title="Sur le terrain." />
-          <Link
-            href={`/articles/${latest.slug}`}
-            data-reveal
-            className="group glass glow grid overflow-hidden rounded-3xl md:grid-cols-2"
-          >
-            <div className="relative aspect-[4/3] overflow-hidden md:aspect-auto md:min-h-[380px]">
-              {latest.coverUrl && (
-                <Image
-                  src={latest.coverUrl}
-                  alt=""
-                  fill
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  className="object-cover transition duration-700 group-hover:scale-105"
-                />
-              )}
-            </div>
-            <div className="flex flex-col justify-center p-8 sm:p-12">
-              <p className="eyebrow">Compte rendu · {formatDate(latest.publishedAt)}</p>
-              <h3 className="mt-4 font-display text-4xl leading-tight">{latest.title}</h3>
-              <p className="mt-4 leading-7 text-muted">{latest.excerpt}</p>
-              <span className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-500">
-                Lire le compte rendu <ArrowRight className="size-4 transition group-hover:translate-x-1" />
-              </span>
-            </div>
-          </Link>
+          <div data-reveal className="halo">
+            {latest.coverUrl && <Halo src={latest.coverUrl} />}
+            <Link
+              href={`/articles/${latest.slug}`}
+              className="group glass glow grid overflow-hidden rounded-3xl md:grid-cols-2"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden md:aspect-auto md:min-h-[380px]">
+                {latest.coverUrl && (
+                  <Image
+                    src={latest.coverUrl}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className="object-cover transition duration-700 group-hover:scale-105"
+                  />
+                )}
+              </div>
+              <div className="flex flex-col justify-center p-8 sm:p-12">
+                <p className="eyebrow">Compte rendu · {formatDate(latest.publishedAt)}</p>
+                <h3 className="mt-4 font-display text-4xl leading-tight">{latest.title}</h3>
+                <p className="mt-4 leading-7 text-muted">{latest.excerpt}</p>
+                <span className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-brand-500">
+                  Lire le compte rendu <ArrowRight className="size-4 transition group-hover:translate-x-1" />
+                </span>
+              </div>
+            </Link>
+          </div>
         </Container>
       )}
 
@@ -376,10 +374,12 @@ export default async function HomePage() {
             <ul
               data-carousel-track
               data-lightbox
-              className="no-scrollbar flex cursor-grab snap-x snap-mandatory gap-4 overflow-x-auto px-[max(1rem,calc(50vw-36rem+1.5rem))] py-6 [scroll-padding-inline:max(1rem,calc(50vw-36rem+1.5rem))]"
+              className="no-scrollbar flex cursor-grab snap-x snap-mandatory gap-4 overflow-x-auto px-[max(1rem,calc(50vw-36rem+1.5rem))] py-12 [scroll-padding-inline:max(1rem,calc(50vw-36rem+1.5rem))]"
             >
+              {/* py-12 : de la place en haut et en bas pour que le halo des photos ne soit pas coupé */}
               {moments.map((p, i) => (
-                <li key={p.id} className="w-[72vw] shrink-0 snap-center sm:w-[300px]">
+                <li key={p.id} className="halo w-[72vw] shrink-0 snap-center sm:w-[300px]">
+                  <Halo src={p.url!} />
                   <div
                     data-full={p.url!}
                     data-caption={p.caption ?? p.alt}

@@ -10,6 +10,7 @@ import { ARTICLE_TYPE_LABELS } from "@pstb/shared";
 import { Avatar } from "@/components/Avatar";
 import { Container } from "@/components/Container";
 import { Gallery } from "@/components/Gallery";
+import { Halo } from "@/components/Halo";
 import { Markdown } from "@/components/Markdown";
 import { api } from "@/lib/api";
 import { formatDate, joinNames } from "@/lib/format";
@@ -49,15 +50,18 @@ export default async function ArticlePage({ params }: Props) {
         </div>
 
         {article.coverUrl && (
-          <div className="glow relative mt-12 aspect-[16/9] overflow-hidden rounded-3xl bg-sunken">
-            <Image
-              src={article.coverUrl}
-              alt=""
-              fill
-              priority
-              sizes="(min-width: 1152px) 1152px, 100vw"
-              className="object-cover"
-            />
+          <div className="halo mt-12">
+            <Halo src={article.coverUrl} />
+            <div className="glow relative aspect-[16/9] overflow-hidden rounded-3xl bg-sunken">
+              <Image
+                src={article.coverUrl}
+                alt=""
+                fill
+                priority
+                sizes="(min-width: 1152px) 1152px, 100vw"
+                className="object-cover"
+              />
+            </div>
           </div>
         )}
 

@@ -101,6 +101,8 @@ Quand on ouvre `/articles/compte-rendu-datadog-summit-paris-2026` :
 
 **`apps/web/src/components/Header.tsx`** : exemple de **mobile first**. Le menu « bureau » est `hidden` par défaut et n'apparaît qu'à partir de `md:` (écrans de 768 px et plus).
 
+**`apps/web/src/components/Halo.tsx`** : le halo de lumière qui s'allume derrière une photo au survol, en CSS seulement. Une copie toute petite de la photo est posée derrière elle, floutée et saturée (`filter: blur() saturate()`), invisible au repos. Au survol, elle apparaît et déborde du cadre : la photo semble diffuser sa propre lumière, avec ses couleurs. `isolation: isolate` sur le parent garde cette copie juste derrière la photo, et pas derrière toute la page.
+
 **`apps/web/src/lib/enhance.ts`** et le dossier **`lib/effects/`** : toutes les interactions, en JavaScript pur branché sur des attributs `data-*` (un fichier par famille d'effets). Aucune librairie 3D : tout est dessiné dans des `<canvas>` avec un peu de trigonométrie.
 - `planet.ts` : la planète de l'accueil. Des points sur une sphère tournent (formules de rotation), puis sont projetés en 2D avec une perspective (`x' = x × f / (f + z)`), le principe de base de tous les moteurs 3D. L'anneau et la lune passent devant puis derrière la planète : on dessine la moitié arrière avant la planète et la moitié avant après. Paris est placé grâce à sa latitude et sa longitude.
 - `starfield.ts` : le ciel étoilé. Chaque étoile a une profondeur ; quand la souris bouge, les proches bougent plus que les lointaines (parallaxe). Quelques étoiles filantes passent de temps en temps.

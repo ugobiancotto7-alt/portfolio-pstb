@@ -1,6 +1,6 @@
 /**
- * L'année scolaire va de septembre à août. Ces calculs servent à la timeline,
- * à la jauge de l'accueil et à l'étiquette "epoch 02/12" du hero.
+ * L'année scolaire va de septembre à août. Ces calculs servent à la timeline
+ * et à la jauge de l'accueil.
  * Tout est calculé à l'heure de Paris, pour ne pas changer de jour à minuit UTC.
  */
 const isoFormatter = new Intl.DateTimeFormat("en-CA", {
@@ -58,6 +58,3 @@ export function schoolYear(today = new Date()) {
     months,
   };
 }
-
-/** "octobre" -> "d'octobre", "mars" -> "de mars" (élision devant une voyelle) */
-export const ofMonth = (name: string) => (/^[aeiouyéè]/i.test(name) ? `d'${name}` : `de ${name}`);
