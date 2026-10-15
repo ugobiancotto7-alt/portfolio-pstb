@@ -8,10 +8,10 @@
 -- =====================================================================
 
 -- ----- Membres (à compléter : nom, rôle, bio, liens, e-mail de connexion)
-insert into members (slug, first_name, role, bio, linkedin_url, github_url, email) values
-  ('ugo',     'Ugo',     'Étudiant Bachelor Data & IA', 'Bio à compléter depuis l''espace admin.', null, 'https://github.com/ugobiancotto7-alt', null),
-  ('tim',     'Tim',     'Étudiant Bachelor Data & IA', 'Bio à compléter depuis l''espace admin.', null, null, null),
-  ('marcelo', 'Marcelo', 'Étudiant Bachelor Data & IA', 'Bio à compléter depuis l''espace admin.', null, null, null);
+insert into members (slug, first_name, role, bio, avatar_url, linkedin_url, github_url, email) values
+  ('ugo',     'Ugo',     'Étudiant Bachelor Data & IA', 'Bio à compléter depuis l''espace admin.', '/photos/faces/ugo.jpg', null, 'https://github.com/ugobiancotto7-alt', null),
+  ('tim',     'Tim',     'Étudiant Bachelor Data & IA', 'Bio à compléter depuis l''espace admin.', '/photos/faces/tim.jpg', null, null, null),
+  ('marcelo', 'Marcelo', 'Étudiant Bachelor Data & IA', 'Bio à compléter depuis l''espace admin.', '/photos/faces/marcelo.jpg', null, null, null);
 
 -- ----- Compétences de base de la filière
 insert into skills (slug, name, category) values
@@ -105,10 +105,10 @@ cross join (values
   ('/photos/datadog-summit/04-amex-gbt.jpg', 'Présentation d''Amex GBT sur scène', 'Amex GBT : l''IA pour accélérer la résolution d''incidents', 4),
   ('/photos/datadog-summit/05-plateforme.jpg', 'Orateur sur scène devant l''écran géant', 'La plateforme de décision, d''action et d''automatisation', 5),
   ('/photos/datadog-summit/06-workshops.jpg', 'Écran annonçant les workshops', 'Le programme des workshops de l''après-midi', 6),
-  ('/photos/datadog-summit/07-totem-entree.jpg', 'Un membre de l''équipe à l''entrée du Summit', 'À l''entrée du Summit', 7),
-  ('/photos/datadog-summit/08-portrait-1.jpg', 'Un membre de l''équipe devant le totem Datadog Summit', 'Devant le totem du Datadog Summit', 8),
-  ('/photos/datadog-summit/09-portrait-2.jpg', 'Un membre de l''équipe devant le totem Datadog Summit', 'Devant le totem du Datadog Summit', 9),
-  ('/photos/datadog-summit/10-portrait-3.jpg', 'Un membre de l''équipe devant le totem Datadog Summit', 'Devant le totem du Datadog Summit', 10),
+  ('/photos/datadog-summit/07-totem-entree.jpg', 'Ugo à l''entrée du Summit', 'Ugo à l''entrée du Summit', 7),
+  ('/photos/datadog-summit/08-portrait-1.jpg', 'Tim devant le totem Datadog Summit', 'Tim devant le totem du Datadog Summit', 8),
+  ('/photos/datadog-summit/09-portrait-2.jpg', 'Ugo devant le totem Datadog Summit', 'Ugo devant le totem du Datadog Summit', 9),
+  ('/photos/datadog-summit/10-portrait-3.jpg', 'Marcelo devant le totem Datadog Summit', 'Marcelo devant le totem du Datadog Summit', 10),
   (null, 'Photo à venir', null, 11),
   (null, 'Photo à venir', null, 12)
 ) as p(url, alt, caption, position)
